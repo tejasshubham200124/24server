@@ -10,24 +10,38 @@ const fs = require('fs');
 app.use(express.json());
 const port = 8000;
 
+// const db = mysql.createConnection({
+//     host: '192.168.100.24',
+//     user: 'dvrhealth',
+//     password: 'dvrhealth',
+//     database: 'esurv'
+// });
+
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'esurvfour'
+    host: '192.168.100.24',
+    user: 'dvrhealth',
+    password: 'dvrhealth',
+    database: 'esurv'
 });
 
 db.connect((err) => {
     if (err) {
         console.error('Error connecting to MySQL:', err);
         return;
+    }else{
+        console.log('Connected to MySQL');
     }
-    console.log('Connected to MySQL');
 });
 
+// app.use(cors({
+//     origin: 'http://192.168.100.24:3000'
+// }));
+
+
 app.use(cors({
-    origin: 'http://localhost:3000'
+    origin: 'http://192.168.100.24:3000'
 }));
+
 
 
 app.get('/TotalSites', (req, res) => {
