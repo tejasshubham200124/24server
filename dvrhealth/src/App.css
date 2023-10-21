@@ -1,0 +1,21 @@
+
+.radius-10 {
+    border-radius: 10px !important;
+  }
+  
+  .border-info {
+    border-left: 5px solid #0dcaf0;
+  }
+  
+  .border-danger {
+    border-left: 5px solid #fd3550;
+  }
+  
+  .border-success {
+    border-left: 5px solid #15ca20 !important;
+  }
+  
+  .border-warning {
+    border-left: 5px solid #ffc107;
+  }
+  
