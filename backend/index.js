@@ -18,10 +18,10 @@ const port = 8000;
 // });
 
 const db = mysql.createConnection({
-    host: '192.168.100.24',
-    user: 'dvrhealth',
-    password: 'dvrhealth',
-    database: 'esurv'
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'esurvfour'
 });
 
 db.connect((err) => {
@@ -39,7 +39,7 @@ db.connect((err) => {
 
 
 app.use(cors({
-    origin: 'http://192.168.100.24:3000'
+    origin: 'http://localhost:3000'
 }));
 
 

@@ -105,7 +105,7 @@ const SiteTable = () => {
                 <div>
                     <div className="row">
                         <div className="col-6 pt-2">
-                            <h6>Site Table</h6>
+                            <h6>Dummy Table</h6>
                             <button onClick={exportToExcel} className="btn btn-primary mt-4">
                                 Export to Excel
                             </button>
