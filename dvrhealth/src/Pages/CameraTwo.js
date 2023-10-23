@@ -18,7 +18,7 @@ const CameraTwo = () => {
         const fileType =
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
-        const fileName = 'Cam4_NotWorkingReport';
+        const fileName = 'Cam2_NotWorkingReport';
 
         const ws = XLSX.utils.json_to_sheet(filteredPosts);
         const wb = { Sheets: { data: ws }, SheetNames: ['data'] };
@@ -72,21 +72,15 @@ const CameraTwo = () => {
     return (
         <div>
             {loading && (
-                <div id="page">
-                    <div id="container">
-                        <div id="ring"></div>
-                        <div id="ring"></div>
-                        <div id="ring"></div>
-                        <div id="ring"></div>
-                        <div id="h3">loading..</div>
-                    </div>
+                <div className="loader-container">
+                    <div className="loader"></div>
                 </div>
             )}
             {!loading && post.length > 0 && (
                 <div>
                     <div className="row">
                         <div className="col-6 pt-2">
-                            <h6>Camera Four Not Working</h6>
+                            <h6>Camera Two Not Working</h6>
                             <button onClick={exportToExcel} className="btn btn-primary mt-4">
                                 Export to Excel
                             </button>
@@ -108,7 +102,7 @@ const CameraTwo = () => {
                             <tr>
                                 <th>Sr No</th>
                                 <th>ATM ID</th>
-                                <th>Camera 4 Status</th>
+                                <th>Camera 2 Status</th>
                                 <th>Up/Down</th>
                                 <th>Router Ip</th>
                                 <th>Last Communication</th>
@@ -126,7 +120,7 @@ const CameraTwo = () => {
                                         <tr key={index}>
                                             <td>{index + 1}</td>
                                             <td style={{ color: 'darkblue', fontWeight: 'bold', fontSize: '15px' }}>{users.atmid}</td>
-                                            <td style={{ color: 'red', fontWeight: 'bold', fontSize: '15px' }}>{users.cam4}</td>
+                                            <td style={{ color: 'red', fontWeight: 'bold', fontSize: '13px' }}>{users.cam2}</td>
                                             <td>
                                                 {users.login_status === 'working' ? (
                                                     <FiArrowUp style={{ color: 'green', fontSize: '20px' }} />
@@ -135,13 +129,13 @@ const CameraTwo = () => {
                                                 )}
                                             </td>
                                             <td style={{ color: 'skyblue', fontWeight: 'bold', fontSize: '15px' }}>{users.ip}</td>
-                                            <td>{users.last_communication}</td>
+                                            <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{users.last_communication}</td>
                                             <td style={{ color: users.hdd_status === 'working' ? 'green' : 'red', fontWeight: 'bold', fontSize: '15px' }}>
                                                 {users.hdd_status}
                                             </td>
-                                            <td>{users.dvrtype}</td>
-                                            <td>{users.recording_from}</td>
-                                            <td>{users.recording_to}</td>
+                                            <td style={{ color: 'orange', fontWeight: 600, fontSize: '13px' }}>{users.dvrtype}</td>
+                                            <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{users.recording_from}</td>
+                                            <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{users.recording_to}</td>
 
                                         </tr>
                                     );

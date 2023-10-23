@@ -17,7 +17,7 @@ const Null = () => {
         const fileType =
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
-        const fileName = 'hdd_not_working_sites';
+        const fileName = 'Null_hdd';
 
         const ws = XLSX.utils.json_to_sheet(filteredPosts);
         const wb = { Sheets: { data: ws }, SheetNames: ['data'] };
@@ -41,9 +41,9 @@ const Null = () => {
         )
         : [];
 
-    const handleSearch = e => {
-        setSearchQuery(e.target.value);
-    };
+    // const handleSearch = e => {
+    //     setSearchQuery(e.target.value);
+    // };
 
 
     const currentPost = filteredPosts.slice(firstPost, lastPost);
@@ -109,9 +109,9 @@ const Null = () => {
                                     </td>
                                     <td style={{ color: 'skyblue', fontWeight: 'bold', fontSize: '15px' }}>{users.ip}</td>
                                     
-                                    <td>{users.City}</td>
-                                    <td>{users.State}</td>
-                                    <td>{users.Zone}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.City}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.State}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.Zone}</td>
                                     <td>
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             <div

@@ -28,7 +28,7 @@ db.connect((err) => {
     if (err) {
         console.error('Error connecting to MySQL:', err);
         return;
-    }else{
+    } else {
         console.log('Connected to MySQL');
     }
 });
@@ -56,6 +56,122 @@ app.get('/TotalSites', (req, res) => {
         }
     });
 });
+
+
+
+
+app.get('/TimeDifferenceCount', (req, res) => {
+    const query = `
+    SELECT COUNT(*) AS time_difference_count
+FROM (
+    SELECT
+        dh.atmid,
+        CONCAT(FLOOR(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()) / 60), ':', MOD(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()), 60)) AS time_difference_hours_minutes
+    FROM
+        dvr_health dh
+    JOIN
+        sites s ON dh.atmid = s.ATMID
+    WHERE
+        dh.login_status = 0
+        AND s.live = 'Y'
+) AS time_difference_sites;
+
+    `;
+
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error counting online entries:', err);
+            res.status(500).json({ error: 'Error counting online entries' });
+        } else {
+            const { time_difference_count } = result[0];
+            res.status(200).json({ time_difference_count });
+        }
+    });
+});
+
+
+app.get('/RecNotAvailableCount', (req, res) => {
+    const query = `
+    SELECT count(*) as recnotavailable FROM dvr_health WHERE live = 'Y' AND (recording_to <> CURDATE() OR recording_to IS NULL);;
+    `;
+
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error counting online entries:', err);
+            res.status(500).json({ error: 'Error counting online entries' });
+        } else {
+            const { recnotavailable } = result[0];
+            res.status(200).json({ recnotavailable });
+        }
+    });
+});
+
+app.get('/RecNotAvailableDetails', (req, res) => {
+    const page = req.query.page || 1;
+    const recordsPerPage = 50;
+    const offset = (page - 1) * recordsPerPage;
+    const atmid = req.query.atmid || '';
+
+    let query = `
+    SELECT
+        dh.atmid,
+        dh.login_status,
+        DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
+        dh.cam1,
+        dh.cam2,
+        dh.cam3,
+        dh.cam4,
+        dh.dvrtype,
+        DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+        DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
+        DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
+        DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
+        dh.ip AS routerip,
+        CASE WHEN dh.hdd = 'ok' THEN 'working' ELSE 'not working' END AS hdd_status,
+        CONCAT(
+            FLOOR(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()) / 60),
+            ':',
+            MOD(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()), 60)
+        ) AS time_difference_hours_minutes
+    FROM
+        dvr_health dh
+    WHERE
+        dh.recording_to <> CURDATE()
+        AND dh.live = 'Y'
+    `;
+
+    if (atmid) {
+        query += ` AND dh.atmid LIKE '%${atmid}%'`;
+    }
+
+    query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
+
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error fetching DVR health data:', err);
+            res.status(500).json({ error: 'Error fetching DVR health data' });
+        } else {
+            if (!atmid) {
+                const totalCountQuery = `SELECT count(*) as recnotavailable FROM dvr_health WHERE live = 'Y' AND (recording_to <> CURDATE() OR recording_to IS NULL);`;
+                db.query(totalCountQuery, (err, countResult) => {
+                    if (err) {
+                        console.error('Error fetching total count of records:', err);
+                        res.status(500).json({ error: 'Error fetching total count of records' });
+                    } else {
+                        res.status(200).json({ data: result, totalCount: countResult[0].recnotavailable });
+                    }
+                });
+            } else {
+                res.status(200).json({ data: result });
+            }
+        }
+    });
+});
+
+
+
+
+
 
 
 app.get('/devicehistory/:atmId', (req, res) => {
@@ -127,7 +243,7 @@ app.get('/OfflineSites', (req, res) => {
             res.status(500).json({ error: 'Error counting offline entries' });
         } else {
             const { offline_count } = result[0];
-            // console.log('Offline count:', offline_count);
+            
             res.status(200).json({ offline_count });
         }
     });
@@ -158,6 +274,7 @@ app.get('/hddnotworkingsites', (req, res) => {
     d.cam2, 
     d.cam3, 
     d.cam4, 
+    d.dvrtype,
     DATE_FORMAT(d.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication, 
     s.city, 
     s.state, 
@@ -706,31 +823,32 @@ app.get('/TimeDifferenceDetails', (req, res) => {
     const offset = (page - 1) * recordsPerPage;
 
     const query = `
-        SELECT
-            dvr_health.atmid,         
-            DATE_FORMAT(dvr_health.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
-            dvr_health.cam1,
-            dvr_health.cam2,
-            dvr_health.cam3,
-            dvr_health.cam4,
-            CASE
-            WHEN dvr_health.login_status = 0 THEN 'working'
-            ELSE 'not working'
-        END AS login_status,
-            DATE_FORMAT(dvr_health.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
-            dvr_health.ip,
-            CASE WHEN dvr_health.hdd = 'ok' THEN 'working' ELSE 'not working' END AS hdd_status,
-            sites.city,
-            sites.state,
-            sites.zone,
-            CONCAT(FLOOR(TIMESTAMPDIFF(MINUTE, dvr_health.cdate, NOW()) / 60), ':', MOD(TIMESTAMPDIFF(MINUTE, dvr_health.cdate, NOW()), 60)) AS time_difference_hours_minutes
-        FROM
-            dvr_health
-        JOIN
-            sites ON dvr_health.atmid = sites.ATMID
-        WHERE
-        dvr_health.login_status = 0
-         AND   sites.live = 'Y'
+    SELECT
+    dh.atmid,
+    dh.login_status,
+    DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
+    dh.cam1,
+    dh.cam2,
+    dh.cam3,
+    dh.cam4,
+    dh.dvrtype,
+    DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+    DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
+    DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
+    DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,          
+    dh.ip AS routerip,
+    CASE WHEN dh.hdd = 'ok' THEN 'working' ELSE 'not working' END AS hdd_status,
+    s.city,
+    s.state,
+    s.zone,
+    CONCAT(FLOOR(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()) / 60), ':', MOD(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()), 60)) AS time_difference_hours_minutes
+FROM
+    dvr_health dh
+JOIN
+    sites s ON dh.atmid = s.ATMID
+WHERE
+    dh.login_status = 0
+    AND s.live = 'Y'
         LIMIT ${recordsPerPage} OFFSET ${offset};
     `;
 
@@ -877,8 +995,7 @@ app.get('/OfflineSiteDetails', (req, res) => {
     const recordsPerPage = 50;
     const offset = (page - 1) * recordsPerPage;
     const atmid = req.query.atmid || '';
-    console.log('Received atmid:', atmid);
-
+    
     let query = `
         SELECT
             dh.atmid,
@@ -888,6 +1005,7 @@ app.get('/OfflineSiteDetails', (req, res) => {
             dh.cam2,
             dh.cam3,
             dh.cam4,
+            dh.dvrtype,
             DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
             dh.ip AS routerip,
             CASE WHEN dh.hdd = 'ok' THEN 'working' ELSE 'not working' END AS hdd_status,
@@ -951,7 +1069,11 @@ app.get('/OnlineSiteDetails', (req, res) => {
             dh.cam2,
             dh.cam3,
             dh.cam4,
+            dh.dvrtype,
             DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+            DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
+            DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
+            DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,          
             dh.ip AS routerip,
             CASE WHEN dh.hdd = 'ok' THEN 'working' ELSE 'not working' END AS hdd_status,
             s.city,
@@ -998,7 +1120,7 @@ app.get('/OnlineSiteDetails', (req, res) => {
 app.get('/devicehistoryTwo/:atmId', (req, res) => {
     const atmId = req.params.atmId;
     const page = req.query.page || 1;
-    const recordsPerPage = 50; 
+    const recordsPerPage = 50;
 
     console.log('Received search ATM ID:', atmId);
 
@@ -1022,7 +1144,7 @@ app.get('/devicehistoryTwo/:atmId', (req, res) => {
     WHERE 
         atmid = ?`;
 
-    
+
     const totalCountQuery = `SELECT COUNT(*) AS totalCount FROM dvr_history WHERE atmid = ?`;
 
     db.query(totalCountQuery, [atmId], (err, countResult) => {
@@ -1031,7 +1153,7 @@ app.get('/devicehistoryTwo/:atmId', (req, res) => {
             res.status(500).json({ error: 'Error fetching total count of records' });
         } else {
             const totalCount = countResult[0].totalCount;
-           
+
             const offset = (page - 1) * recordsPerPage;
 
             query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
@@ -1047,9 +1169,6 @@ app.get('/devicehistoryTwo/:atmId', (req, res) => {
         }
     });
 });
-
-
-
 
 
 app.get('/AllSites', (req, res) => {
@@ -1079,7 +1198,12 @@ app.get('/AllSites', (req, res) => {
             END AS login_status,
             dh.atmid,
             dh.dvrtype,
+          
             DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+            DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
+            DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
+            DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
+          
             s.City,
             s.State,
             s.Zone
@@ -1122,37 +1246,42 @@ app.get('/ExportAllSites', (req, res) => {
     const atmid = req.query.atmid || '';
 
     let query = `
-        SELECT
-            dh.ip,
-            dh.cam1,
-            dh.cam2,
-            dh.cam3,
-            dh.cam4,
-            dh.latency,
-            CASE
-                WHEN dh.hdd = 'ok' THEN 'working'
-                ELSE 'not working'
-            END AS hdd_status,
-            CASE
-                WHEN dh.login_status = 0 THEN 'working'
-                ELSE 'not working'
-            END AS login_status,
-            dh.atmid,
-            dh.dvrtype,
-            DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
-            s.City,
-            s.State,
-            s.Zone
-        FROM
-            dvr_health dh
-        JOIN
-            sites s
-        ON
-            dh.atmid = s.ATMID`;
+    SELECT
+    dh.ip,
+    dh.cam1,
+    dh.cam2,
+    dh.cam3,
+    dh.cam4,
+    dh.latency,
+    CASE
+        WHEN dh.hdd = 'ok' THEN 'working'
+        ELSE 'not working'
+    END AS hdd_status,
+    CASE
+        WHEN dh.login_status = 0 THEN 'working'
+        ELSE 'not working'
+    END AS login_status,
+    dh.atmid,
+    dh.dvrtype,
+  
+    DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+    DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
+    DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
+    DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
+  
+    s.City,
+    s.State,
+    s.Zone
+FROM
+    dvr_health dh
+JOIN
+    sites s
+ON
+    dh.atmid = s.ATMID`;
 
-    if (atmid) {
-        query += ` WHERE LOWER(dh.atmid) LIKE '%${atmid.toLowerCase()}%'`;
-    }
+    // if (atmid) {
+    //     query += ` WHERE LOWER(dh.atmid) LIKE '%${atmid.toLowerCase()}%'`;
+    // }
 
     db.query(query, (err, result) => {
         if (err) {
@@ -1166,36 +1295,39 @@ app.get('/ExportAllSites', (req, res) => {
 
 app.get('/ExportOnlineSites', (req, res) => {
 
-
-    const atmid = req.query.atmid || '';
+    // const atmid = req.query.atmid || '';
 
     let query = `
-        SELECT
-            dh.atmid,
-            dh.login_status,
-            DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
-            dh.cam1,
-            dh.cam2,
-            dh.cam3,
-            dh.cam4,
-            DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
-            dh.ip AS routerip,
-            CASE WHEN dh.hdd = 'ok' THEN 'working' ELSE 'not working' END AS hdd_status,
-            s.city,
-            s.state,
-            s.zone,
-            CONCAT(FLOOR(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()) / 60), ':', MOD(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()), 60)) AS time_difference_hours_minutes
-        FROM
-            dvr_health dh
-        JOIN
-            sites s ON dh.atmid = s.ATMID
-        WHERE
-            dh.login_status = 0
-            AND s.live = 'Y'`;
+    SELECT
+    dh.atmid,
+    dh.login_status,
+    DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
+    dh.cam1,
+    dh.cam2,
+    dh.cam3,
+    dh.cam4,
+    dh.dvrtype,
+    DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+    DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
+    DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
+    DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,          
+    dh.ip AS routerip,
+    CASE WHEN dh.hdd = 'ok' THEN 'working' ELSE 'not working' END AS hdd_status,
+    s.city,
+    s.state,
+    s.zone,
+    CONCAT(FLOOR(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()) / 60), ':', MOD(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()), 60)) AS time_difference_hours_minutes
+FROM
+    dvr_health dh
+JOIN
+    sites s ON dh.atmid = s.ATMID
+WHERE
+    dh.login_status = 0
+    AND s.live = 'Y'`;
 
-    if (atmid) {
-        query += ` AND dh.atmid LIKE '%${atmid}%'`;
-    }
+    // if (atmid) {
+    //     query += ` AND dh.atmid LIKE '%${atmid}%'`;
+    // }
 
     db.query(query, (err, result) => {
         if (err) {
@@ -1211,32 +1343,33 @@ app.get('/ExportOfflineSites', async (req, res) => {
     const atmid = req.query.atmid || '';
 
     let query = `
-        SELECT
-            dh.atmid,
-            dh.login_status,
-            DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
-            dh.cam1,
-            dh.cam2,
-            dh.cam3,
-            dh.cam4,
-            DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
-            dh.ip AS routerip,
-            CASE WHEN dh.hdd = 'ok' THEN 'working' ELSE 'not working' END AS hdd_status,
-            s.city,
-            s.state,
-            s.zone,
-            CONCAT(FLOOR(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()) / 60), ':', MOD(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()), 60)) AS time_difference_hours_minutes
-        FROM
-            dvr_health dh
-        JOIN
-            sites s ON dh.atmid = s.ATMID
-        WHERE
-            dh.login_status = 1 OR dh.login_status IS NULL
-            AND s.live = 'Y'`;
+    SELECT
+    dh.atmid,
+    dh.login_status,
+    DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
+    dh.cam1,
+    dh.cam2,
+    dh.cam3,
+    dh.cam4,
+    dh.dvrtype,
+    DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+    dh.ip AS routerip,
+    CASE WHEN dh.hdd = 'ok' THEN 'working' ELSE 'not working' END AS hdd_status,
+    s.city,
+    s.state,
+    s.zone,
+    CONCAT(FLOOR(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()) / 60), ':', MOD(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()), 60)) AS time_difference_hours_minutes
+FROM
+    dvr_health dh
+JOIN
+    sites s ON dh.atmid = s.ATMID
+WHERE
+    dh.login_status = 1 OR dh.login_status IS NULL
+    AND s.live = 'Y'`;
 
-    if (atmid) {
-        query += ` AND dh.atmid LIKE '%${atmid}%'`;
-    }
+    // if (atmid) {
+    //     query += ` AND dh.atmid LIKE '%${atmid}%'`;
+    // }
 
     db.query(query, (err, result) => {
         if (err) {
@@ -1250,7 +1383,6 @@ app.get('/ExportOfflineSites', async (req, res) => {
 
 
 app.get('/TimeDifferenceExport', (req, res) => {
-
 
     const query = `
         SELECT
@@ -1281,6 +1413,46 @@ app.get('/TimeDifferenceExport', (req, res) => {
        
     `;
 
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error fetching DVR health data for export:', err);
+            res.status(500).json({ error: 'Error fetching DVR health data for export' });
+        } else {
+            res.status(200).json({ data: result });
+        }
+    });
+});
+
+
+app.get('/RecNotavailableExport', (req, res) => {
+
+    const query = `
+    SELECT
+    dh.atmid,
+    dh.login_status,
+    DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
+    dh.cam1,
+    dh.cam2,
+    dh.cam3,
+    dh.cam4,
+    dh.dvrtype,
+    DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+    DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
+    DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
+    DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
+    dh.ip AS routerip,
+    CASE WHEN dh.hdd = 'ok' THEN 'working' ELSE 'not working' END AS hdd_status,
+    CONCAT(
+        FLOOR(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()) / 60),
+        ':',
+        MOD(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()), 60)
+    ) AS time_difference_hours_minutes
+FROM
+    dvr_health dh
+WHERE
+    dh.recording_to <> CURDATE()
+    AND dh.live = 'Y'       
+    `;
 
     db.query(query, (err, result) => {
         if (err) {
@@ -1294,8 +1466,6 @@ app.get('/TimeDifferenceExport', (req, res) => {
 
 
 app.get('/DeviceHistoryExport', (req, res) => {
-
-
     const query = `
     SELECT 
     *,
@@ -1306,18 +1476,15 @@ app.get('/DeviceHistoryExport', (req, res) => {
     CASE 
         WHEN login_status = 0 THEN 'working'
         ELSE 'not working'
-    END AS login_status_status,
+    END AS login_status, /* Corrected alias name here */
     DATE_FORMAT(last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
     DATE_FORMAT(recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
     DATE_FORMAT(recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
     DATE_FORMAT(cdate, '%Y-%m-%d %H:%i:%s') AS cdate
-FROM 
+    FROM 
     dvr_history 
-WHERE 
-    atmid = ?;
- [atmId],     
+    
     `;
-
 
     db.query(query, (err, result) => {
         if (err) {
@@ -1329,6 +1496,64 @@ WHERE
     });
 });
 
+
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    db.query('SELECT * FROM registered_users WHERE username = ? AND password = ?', [username, password], (err, results) => {
+        if (err) {
+            console.error('Error fetching user:', err);
+            res.status(500).json({ error: 'Internal server error' });
+        } else if (results.length === 0) {
+            console.log('No user found for username:', username);
+            res.status(401).json({ error: 'Authentication failed' });
+        } else {
+            const user = results[0];
+            if (!user) {
+                console.log('User object is null');
+                res.status(500).json({ error: 'Internal server error' });
+                return;
+            }  
+            const id = user.id;
+            console.log('User found with id:', id);
+            res.status(200).json({
+                message: 'Login successful',
+                id,
+                
+            });
+        }
+    });
+});
+
+app.get('/verify_id', (req, res) => {
+    const query = `
+      SELECT id
+      FROM registered_users;
+    `;
+
+    db.query(query, (err, results) => {
+        if (err) {
+            console.error('Error fetching user data:', err);
+            res.status(500).json({ error: 'Internal server error' });
+        } else {
+            res.status(200).json(results);
+        }
+    });
+});
+
+app.post('/register', (req, res) => {
+    const { username, email, password } = req.body;
+    const user = { username, email, password };
+
+    db.query('INSERT INTO registered_users SET ?', user, (err, result) => {
+        if (err) {
+            console.error('Error registering user:', err);
+            res.status(500).json({ error: 'Internal server error' });
+        } else {
+            res.status(201).json({ message: 'User registered successfully' });
+        }
+    });
+});
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

@@ -31,7 +31,7 @@ const Hdd = () => {
                         width: 'calc(16.666% - 20px)',
                         margin: '5px',
                         padding: '10px',
-                        background: "#748E63",
+                        background: "#435334",
                         border: '1px solid #ccc',
                         borderRadius: '5px',
                         boxSizing: 'border-box',

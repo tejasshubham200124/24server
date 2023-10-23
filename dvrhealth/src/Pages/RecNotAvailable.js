@@ -5,7 +5,7 @@ import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { FiArrowUp, FiArrowDown } from 'react-icons/fi'
 
-const OnlineSiteTable = () => {
+const RecNotAvailable = () => {
     const [post, setPost] = useState([]);
     const [number, setNumber] = useState(1);
     const [postPerPage] = useState(50);
@@ -14,7 +14,6 @@ const OnlineSiteTable = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [totalCount, setTotalCount] = useState(0);
-
     const firstPost = (number - 1) * postPerPage;
     const lastPost = Math.min(firstPost + postPerPage, totalCount);
 
@@ -25,7 +24,7 @@ const OnlineSiteTable = () => {
     const fetchAllSitesData = (page) => {
         setLoading(true);
 
-        let apiUrl = `http://localhost:8000/OnlineSiteDetails?page=${page}`;
+        let apiUrl = `http://localhost:8000/RecNotAvailableDetails?page=${page}`;
 
         if (searchTerm) {
             apiUrl += `&atmid=${searchTerm}`;
@@ -70,7 +69,7 @@ const OnlineSiteTable = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await axios.get('http://localhost:8000/ExportOnlineSites');
+                const response = await axios.get('http://localhost:8000/RecNotavailableExport');
                 setData(response.data.data);
             } catch (error) {
                 console.error('Error fetching data from API:', error);
@@ -85,7 +84,7 @@ const OnlineSiteTable = () => {
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
-        XLSX.writeFile(wb, 'Online_Sites.xlsx');
+        XLSX.writeFile(wb, 'RecordingNotAvailable.xlsx');
     };
 
 
@@ -101,7 +100,7 @@ const OnlineSiteTable = () => {
                 <div>
                     <div className="row">
                         <div className="col-6 pt-2">
-                            <h6>Online Site Table</h6>
+                            <h6>Recording Not Available</h6>
                             <button onClick={exportToExcel} className="btn btn-primary mt-3">
                                 Export to Excel
                             </button>
@@ -134,9 +133,6 @@ const OnlineSiteTable = () => {
                                     Up/Down
                                 </th>
                                 <th>Device Time</th>
-                                <th>City</th>
-                                <th>State</th>
-                                <th>Zone</th>
                                 <th>HDD Status</th>
                                 <th>Last Communication</th>
                                 <th>Router Ip</th>
@@ -162,9 +158,6 @@ const OnlineSiteTable = () => {
                                         )}
                                     </td>
                                     <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{users.cdate}</td>
-                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.city}</td>
-                                    <td style={{ fontWeight: 600, fontSize: '13px' }}> {users.state}</td>
-                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.zone}</td>
                                     <td style={{ color: users.hdd_status === 'working' ? 'green' : 'red', fontWeight: 'bold', fontSize: '14px' }}>
                                         {users.hdd_status}
                                     </td>
@@ -239,4 +232,4 @@ const OnlineSiteTable = () => {
     );
 };
 
-export default OnlineSiteTable;
+export default RecNotAvailable;

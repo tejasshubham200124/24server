@@ -41,9 +41,9 @@ const HddNotWorking = () => {
         )
         : [];
 
-    const handleSearch = e => {
-        setSearchQuery(e.target.value);
-    };
+    // const handleSearch = e => {
+    //     setSearchQuery(e.target.value);
+    // };
 
 
     const currentPost = filteredPosts.slice(firstPost, lastPost);
@@ -68,7 +68,6 @@ const HddNotWorking = () => {
             <div className="row">
                 <div className="col-6 pt-3">
                     <h6>HDD Status Report </h6>
-
                 </div>
                 <div className="col-6 d-flex justify-content-end">
                     <div className='col-4 text-end login-form2'>
@@ -84,12 +83,13 @@ const HddNotWorking = () => {
                         <th>Sr No</th>
                         <th>ATM ID</th>
                         <th>Up/Down</th>
-                        <th>Router Ip</th>
-                        <th>Last Communication</th>
-                        <th>Status</th>
                         <th>City</th>
                         <th>State</th>
                         <th>Zone</th>
+                        <th>Router Ip</th>
+                        <th>Last Communication</th>
+                        <th>Status</th>
+                        <th>Dvr Type</th>
                         <th>Camera Status</th>
                         <th>Aging</th>
                     </tr>
@@ -108,13 +108,13 @@ const HddNotWorking = () => {
                                             <FiArrowDown style={{ color: 'red', fontSize: '20px' }} />
                                         )}
                                     </td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.city}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.state}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.zone}</td>
                                     <td style={{ color: 'skyblue', fontWeight: 'bold', fontSize: '15px' }}>{users.ip}</td>
-                                    <td>{users.last_communication}</td>
-                                    <td>{users.hdd}</td>
-
-                                    <td>{users.city}</td>
-                                    <td>{users.state}</td>
-                                    <td>{users.zone}</td>
+                                    <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{users.last_communication}</td>
+                                    <td style={{ color: 'red', fontWeight: 700, fontSize: '13px' }}>{users.hdd}</td>
+                                    <td style={{ color: 'orange', fontWeight: 600, fontSize: '13px' }}>{users.dvrtype}</td>
                                     <td>
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             <div

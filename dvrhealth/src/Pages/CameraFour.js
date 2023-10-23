@@ -72,14 +72,8 @@ const CameraFour = () => {
     return (
         <div>
             {loading && (
-                <div id="page">
-                    <div id="container">
-                        <div id="ring"></div>
-                        <div id="ring"></div>
-                        <div id="ring"></div>
-                        <div id="ring"></div>
-                        <div id="h3">loading..</div>
-                    </div>
+                <div className="loader-container">
+                    <div className="loader"></div>
                 </div>
             )}
             {!loading && post.length > 0 && (
@@ -126,7 +120,7 @@ const CameraFour = () => {
                                         <tr key={index}>
                                             <td>{index + 1}</td>
                                             <td style={{ color: 'darkblue', fontWeight: 'bold', fontSize: '15px' }}>{users.atmid}</td>
-                                            <td style={{ color: 'red', fontWeight: 'bold', fontSize: '15px' }}>{users.cam4}</td>
+                                            <td style={{ color: 'red', fontWeight: 'bold', fontSize: '13px' }}>{users.cam4}</td>
                                             <td>
                                                 {users.login_status === 'working' ? (
                                                     <FiArrowUp style={{ color: 'green', fontSize: '20px' }} />
@@ -135,13 +129,13 @@ const CameraFour = () => {
                                                 )}
                                             </td>
                                             <td style={{ color: 'skyblue', fontWeight: 'bold', fontSize: '15px' }}>{users.ip}</td>
-                                            <td>{users.last_communication}</td>
+                                            <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{users.last_communication}</td>
                                             <td style={{ color: users.hdd_status === 'working' ? 'green' : 'red', fontWeight: 'bold', fontSize: '15px' }}>
                                                 {users.hdd_status}
                                             </td>
-                                            <td>{users.dvrtype}</td>
-                                            <td>{users.recording_from}</td>
-                                            <td>{users.recording_to}</td>
+                                            <td style={{ color: 'orange', fontWeight: 600, fontSize: '13px' }}>{users.dvrtype}</td>
+                                            <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{users.recording_from}</td>
+                                            <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{users.recording_to}</td>
 
                                         </tr>
                                     );

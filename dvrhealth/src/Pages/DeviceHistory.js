@@ -57,34 +57,47 @@ const DeviceHistory = () => {
     };
 
     useEffect(() => {
-        fetchData(number); // Fetch initial data on component load
+        fetchData(number);
     }, [atmId, number]);
 
     const handlePageClick = (selected) => {
         const newPageNumber = selected.selected + 1;
         setNumber(newPageNumber);
-        fetchData(newPageNumber); // Fetch data for the selected page
+        fetchData(newPageNumber);
     };
 
 
-    const exportToExcel = () => {
-        const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-        const fileExtension = '.xlsx';
-        const fileName = 'offline_sites';
-
-        const ws = XLSX.utils.json_to_sheet(post);
-        const wb = { Sheets: { data: ws }, SheetNames: ['data'] };
-        const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-        const data = new Blob([excelBuffer], { type: fileType });
-        const href = URL.createObjectURL(data);
-        const link = document.createElement('a');
-        link.href = href;
-        link.download = fileName + fileExtension;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
+    const exportToExcel = async () => {
+        try {
+           
+            const response = await axios.get('http://localhost:8000/DeviceHistoryExport');
+            const data = response.data.data;
+    
+           
+            const ws = XLSX.utils.json_to_sheet(data);
+    
+           
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+       
+            const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    
+            // Create a URL for the Blob
+            const dataUrl = URL.createObjectURL(blob);
+    
+            // Create an anchor element to trigger the download
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = 'DeviceHistory.xlsx';
+    
+            // Trigger a click event on the anchor element
+            link.click();
+        } catch (error) {
+            console.error('Error exporting to Excel:', error);
+        }
+    }
+    
     return (
         <div>
             {loading && (
@@ -97,7 +110,7 @@ const DeviceHistory = () => {
                 <div>
                     <div className="row">
                         <div className="col-6 pt-2">
-                            <h6>Offline Site Table</h6>
+                            <h6>Device History</h6>
                             <button onClick={exportToExcel} className="btn btn-primary mt-4">
                                 Export to Excel
                             </button>
@@ -109,14 +122,13 @@ const DeviceHistory = () => {
                                 <th>Sr No</th>
                                 <th>ATM ID</th>
                                 <th>Up/Down</th>
-                                <th>City</th>
-                                <th>State</th>
-                                <th>Zone</th>
-                                <th>Last Communication</th>
+                                <th>Device Time</th>
                                 <th>HDD Status</th>
+                                <th>Last Communication</th>
                                 <th>Router Ip</th>
                                 <th>Camera Status</th>
-                                <th>No Of Days</th>
+                                <th>Rec From</th>
+                                <th>Rec To</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -125,20 +137,20 @@ const DeviceHistory = () => {
                                     <td>{index + 1}</td>
                                     <td style={{ color: 'darkblue', fontWeight: 'bold', fontSize: '15px' }}>{item.atmid}</td>
                                     <td>
-                                        {item.login_status === 0 ? (
+                                        {item.login_status === "working" ? (
                                             <FiArrowUp style={{ color: 'green', fontSize: '20px' }} />
                                         ) : (
                                             <FiArrowDown style={{ color: 'red', fontSize: '20px' }} />
                                         )}
                                     </td>
-                                    <td>{item.city}</td>
-                                    <td>{item.state}</td>
-                                    <td>{item.zone}</td>
-                                    <td>{item.last_communication}</td>
+                                    <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{item.cdate}</td>
+
+
                                     <td style={{ color: item.hdd_status === 'working' ? 'green' : 'red', fontWeight: 'bold', fontSize: '15px' }}>
                                         {item.hdd_status}
                                     </td>
-                                    <td>{item.routerip}</td>
+                                    <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{item.last_communication}</td>
+                                    <td style={{ color: 'skyblue', fontWeight: 'bold', fontSize: '13px' }}>{item.ip}</td>
                                     <td>
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             <div
@@ -180,7 +192,8 @@ const DeviceHistory = () => {
                                             ></div>
                                         </div>
                                     </td>
-                                    <td style={{ color: 'red', fontWeight: 'bold', fontSize: '15px' }}>{item.time_difference_hours_minutes}</td>
+                                    <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{item.recording_from}</td>
+                                    <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{item.recording_to}</td>
                                 </tr>
                             ))}
                         </tbody>

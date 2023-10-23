@@ -19,8 +19,13 @@ const App = () => {
                     alignItems: 'center',
                 }}
             >
-               
-              
+
+                {/* <div className="logo-container">
+                    <div className="heartbeat-animation">
+                        <img src="logo.jpg" alt="Logo" className="logo" />
+                    </div>
+                </div> */}
+
             </Header>
             <Content
                 style={{
@@ -28,6 +33,7 @@ const App = () => {
                     padding: 24,
                     minHeight: 280,
                     background: colorBgContainer,
+                    overflow: 'hidden'
                 }}
             >
                 <Outlet />

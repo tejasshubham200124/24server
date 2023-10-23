@@ -17,7 +17,7 @@ const NoDisk = () => {
         const fileType =
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
-        const fileName = 'hdd_not_working_sites';
+        const fileName = 'NoDisk_Hdd';
 
         const ws = XLSX.utils.json_to_sheet(filteredPosts);
         const wb = { Sheets: { data: ws }, SheetNames: ['data'] };
@@ -41,9 +41,9 @@ const NoDisk = () => {
         )
         : [];
 
-    const handleSearch = e => {
-        setSearchQuery(e.target.value);
-    };
+    // const handleSearch = e => {
+    //     setSearchQuery(e.target.value);
+    // };
 
 
     const currentPost = filteredPosts.slice(firstPost, lastPost);
@@ -108,10 +108,10 @@ const NoDisk = () => {
                                         )}
                                     </td>
                                     <td style={{ color: 'skyblue', fontWeight: 'bold', fontSize: '15px' }}>{users.ip}</td>
-                                    <td>{users.last_communication}</td>
-                                    <td>{users.City}</td>
-                                    <td>{users.State}</td>
-                                    <td>{users.Zone}</td>
+                                    <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{users.last_communication}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.City}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.State}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.Zone}</td>
                                     <td>
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                             <div

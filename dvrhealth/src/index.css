@@ -3,10 +3,10 @@ body {
   padding: 0;
 }
 
-/* main {
+ /* main {
   overflow-y: scroll;
-  height: 80vh;
-} */
+  height: 100vh;
+}  */
 
 .ant-layout {
   min-height: 100vh;
@@ -170,7 +170,7 @@ main::-webkit-scrollbar {
   flex-direction: row;
 }
 
-/* Define styles for the custom-table class */
+
 .custom-table {
   width: 100%;
   border-collapse: collapse;
@@ -216,9 +216,16 @@ main::-webkit-scrollbar {
   /* Add spacing between the table and the button */
 }
 
+.show-all-button-container {
+  display: flex;
+  justify-content: center;
+  /* Center the button horizontally */
+  margin-top: 20px;
+  /* Add spacing between the table and the button */
+}
+
 .show-all-button {
-  width: 100%;
-  /* Make the button as wide as the container */
+  width: 100%; /* Set the button width to 100% to match the container's width */
   background-color: darkslateblue;
   color: white;
   font-weight: bold;
@@ -229,9 +236,6 @@ main::-webkit-scrollbar {
   cursor: pointer;
 }
 
-.show-all-button:hover {
-  background-color: slateblue;
-}
 
 .straight {
   display: flex;
@@ -309,4 +313,269 @@ main::-webkit-scrollbar {
   50%   {transform:translate( 60%, 60%)}
   67.5% {transform:translate(-65%,-70%)}
   75%   {transform:translate( 60%,-60%)}
+}
+
+.with-gradient-border {
+  border-left: 5px linear-gradient(to bottom, #ff5722, #e91e63) !important; /* Adjust colors and gradient direction as needed */
+}
+
+.nav-tabs .nav-link{
+  color: darkslateblue !important;
+  font-weight: bold;
+}
+
+.onlinesi{
+ color:#27ae60
+}
+
+.neveronsi{
+  color: red !important;
+}
+.neveronsi2{
+  color: red !important;
+  font-weight: bold;
+}
+
+.offlinesi{
+  color: #3876BF !important;
+}
+.hddsi{
+  color: purple !important;
+}
+
+
+
+.background {
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  background: #352e6b;
+  overflow: hidden;
+}
+
+.background li {
+  position: absolute;
+  display: block;
+  list-style: none;
+  width: 20px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  animation: animate 19s linear infinite;
+}
+
+.background li:nth-child(0) {
+  left: 50%;
+  width: 112px;
+  height: 112px;
+  bottom: -112px;
+  animation-delay: 1s;
+}
+
+.background li:nth-child(1) {
+  left: 40%;
+  width: 168px;
+  height: 168px;
+  bottom: -168px;
+  animation-delay: 1s;
+}
+
+.background li:nth-child(2) {
+  left: 72%;
+  width: 153px;
+  height: 153px;
+  bottom: -153px;
+  animation-delay: 6s;
+}
+
+.background li:nth-child(3) {
+  left: 13%;
+  width: 118px;
+  height: 118px;
+  bottom: -118px;
+  animation-delay: 2s;
+}
+
+.background li:nth-child(4) {
+  left: 61%;
+  width: 160px;
+  height: 160px;
+  bottom: -160px;
+  animation-delay: 8s;
+}
+
+.background li:nth-child(5) {
+  left: 40%;
+  width: 122px;
+  height: 122px;
+  bottom: -122px;
+  animation-delay: 5s;
+}
+
+.background li:nth-child(6) {
+  left: 64%;
+  width: 116px;
+  height: 116px;
+  bottom: -116px;
+  animation-delay: 11s;
+}
+
+.background li:nth-child(7) {
+  left: 52%;
+  width: 197px;
+  height: 197px;
+  bottom: -197px;
+  animation-delay: 16s;
+}
+
+.background li:nth-child(8) {
+  left: 4%;
+  width: 146px;
+  height: 146px;
+  bottom: -146px;
+  animation-delay: 14s;
+}
+
+.background li:nth-child(9) {
+  left: 67%;
+  width: 178px;
+  height: 178px;
+  bottom: -178px;
+  animation-delay: 29s;
+}
+
+
+.login-form {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding-top: 20px;
+}
+
+.login-form input[type="text"],
+.login-form input[type="password"] {
+  padding: 0;
+  border: none;
+  border-bottom: 1px solid rgb(154, 154, 231);
+  width: 100%;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  outline: none !important;
+  /* Remove the outline */
+  box-shadow: none !important;
+  /* Remove the box shadow */
+}
+.login-form2 {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+
+}
+
+.login-form2 input[type="text"],
+.login-form2 input[type="password"] {
+  padding: 0;
+  border: none;
+  border-bottom: 1px solid rgb(154, 154, 231);
+  width: 100%;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  outline: none !important;
+  /* Remove the outline */
+  box-shadow: none !important;
+  /* Remove the box shadow */
+}
+
+.gradient-rect {
+  fill: url(#gradient);
+  /* Apply the gradient color to the mask */
+}
+
+.login-button2 {
+  background-image: linear-gradient(to bottom, #0851a6, #021b79);
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+
+.signup{
+  
+  text-decoration: none;
+}
+
+a{
+    color: #0d6efd;
+    text-decoration: none;
+}
+.login-button {
+  padding-top: 2rem;
+}
+
+.login-container {
+  text-align: center;
+}
+
+.login-heading {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.login-icon {
+  font-size: 40px;
+}
+
+.login-icon path {
+  mask: url(#gradient-mask);
+  /* fill: #294769;  */
+  fill: #0851a6;
+}
+@keyframes animate {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+    border-radius: 0;
+  }
+
+  100% {
+    transform: translateY(-1000px) rotate(720deg);
+    opacity: 0;
+    border-radius: 50%;
+  }
+}
+
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* height: 100vh; */
+  background: black !important; /* Background color */
+}
+
+.heartbeat-animation {
+  width: 200px; /* Adjust the size to fit your logo */
+  height:auto;
+  animation: heartbeat 2s ease-in-out infinite;
+}
+
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1); 
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.logo {
+  width: 100%; /* 100% width to fill the container */
+  height: auto; /* Maintain aspect ratio */
 }

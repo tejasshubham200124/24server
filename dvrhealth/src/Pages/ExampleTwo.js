@@ -1,180 +1,182 @@
-import React, { useState, useEffect } from 'react';
-import { Table } from 'react-bootstrap'
-import ReactPaginate from "react-paginate";
+import React, { useState, useEffect,Suspense } from 'react';
+import { Table } from 'react-bootstrap';
+import ReactPaginate from 'react-paginate';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
-import { FiArrowUp, FiArrowDown } from 'react-icons/fi'
-import { useParams } from 'react-router-dom';
+import TableRow from './TableRow';
 
-const ExampleTwo = () => {
+
+const SiteTable = () => {
     const [post, setPost] = useState([]);
     const [number, setNumber] = useState(1);
-    const [postPerPage] = useState(100);
-    const [searchQuery, setSearchQuery] = useState('');
-    const lastPost = number * postPerPage;
-    const firstPost = lastPost - postPerPage;
+    const [postPerPage] = useState(50);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTermEntered, setSearchTermEntered] = useState('');
+    const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { atmId } = useParams();
+    const [totalCount, setTotalCount] = useState(0);
 
-    const exportToExcel = () => {
-        const fileType =
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-        const fileExtension = '.xlsx';
-        const fileName = 'Cam4_NotWorkingReport';
+    const firstPost = (number - 1) * postPerPage;
+    const lastPost = Math.min(firstPost + postPerPage, totalCount);
 
-        const ws = XLSX.utils.json_to_sheet(filteredPosts);
-        const wb = { Sheets: { data: ws }, SheetNames: ['data'] };
-        const excelBuffer = XLSX.write(wb, {
-            bookType: 'xlsx',
-            type: 'array',
-        });
-        const data = new Blob([excelBuffer], { type: fileType });
-        const href = URL.createObjectURL(data);
-        const link = document.createElement('a');
-        link.href = href;
-        link.download = fileName + fileExtension;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
+    useEffect(() => {
+        fetchAllSitesData(number, searchTermEntered);
+    }, [number, searchTermEntered]);
 
+    const fetchAllSitesData = (page) => {
+        setLoading(true);
 
-    const filteredPosts = post
-        ? post.filter(post =>
-            post.atmid && post.atmid.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        : [];
+        let apiUrl = `http://localhost:8000/AllSites?page=${page}`;
 
-    const handleSearch = e => {
-        setSearchQuery(e.target.value);
-    };
+        if (searchTerm) {
+            apiUrl += `&atmid=${searchTerm}`;
+        }
 
-
-    const currentPost = filteredPosts.slice(firstPost, lastPost);
-    const PageCount = Math.ceil(filteredPosts.length / postPerPage);
-    const ChangePage = ({ selected }) => {
-        setNumber(selected + 1);
+        axios
+            .get(apiUrl)
+            .then((response) => {
+                console.log('API Response for Page', page, ':', response.data);
+                const responseData = response.data.data || [];
+                setPost(responseData);
+                setTotalCount(response.data.totalCount || 0);
+            })
+            .catch((error) => {
+                console.error('API Error:', error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     };
 
     useEffect(() => {
-        axios
-            .get(`http://localhost:8000/devicehistoryTwo/${atmId}`)
-            .then((response) => {
-                if (response.data && response.data.data) {
-                    setPost(response.data.data);
-                    console.log('Fetched data:', response.data.data); 
-                    setLoading(false);
-                } else {
-                    console.log('No data received from API.'); 
-                }
-            })
-            .catch((error) => {
-                console.error('Error fetching data:', error);
-                setLoading(false);
-            });
-    }, [atmId]);
-    
-    
+        const handleBackspace = (e) => {
+            if (e.key === 'Backspace' && searchTerm === '') {
+                fetchAllSitesData(number, '');
+            }
+        };
+        window.addEventListener('keydown', handleBackspace);
+        return () => {
+            window.removeEventListener('keydown', handleBackspace);
+        };
+    }, [searchTerm]);
 
+    const handlePageClick = (selected) => {
+        const newPageNumber = selected.selected + 1;
+        setNumber(newPageNumber);
+        fetchAllSitesData(newPageNumber, searchTerm);
+    };
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get('http://localhost:8000/ExportAllSites');
+                setData(response.data.data);
+            } catch (error) {
+                console.error('Error fetching data from API:', error);
+            }
+            setLoading(false);
+        };
+
+        fetchData();
+    }, []);
+
+    const exportToExcel = () => {
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
+        XLSX.writeFile(wb, 'Site_table.xlsx');
+    };
+
+    const Fallback = () => <tr><td>Loading....</td></tr>;
 
     return (
         <div>
             {loading && (
-                <div id="page">
-                    <div id="container">
-                        <div id="ring"></div>
-                        <div id="ring"></div>
-                        <div id="ring"></div>
-                        <div id="ring"></div>
-                        <div id="h3">loading..</div>
-                    </div>
+                <div className="loader-container">
+                    <div className="loader"></div>
                 </div>
             )}
+
             {!loading && post.length > 0 && (
                 <div>
                     <div className="row">
                         <div className="col-6 pt-2">
-                            <h6>Camera Four Not Working</h6>
-                            <button onClick={exportToExcel} className="btn btn-primary mt-4">
+                            <h6>Online Site Table</h6>
+                            <button onClick={exportToExcel} className="btn btn-primary mt-3">
                                 Export to Excel
                             </button>
+
                         </div>
                         <div className="col-6 d-flex justify-content-end">
                             <div className='col-4 text-end login-form2'>
                                 <input
                                     type="text"
-                                    value={searchQuery}
-                                    onChange={handleSearch}
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onKeyUp={(e) => {
+                                        if (e.key === 'Enter') {
+                                            fetchAllSitesData(number, e.target.value);
+                                        }
+                                    }}
                                     placeholder='search atmid'
-                                    className='form-control '
+                                    className='form-control'
+
                                 />
                             </div>
                         </div>
                     </div>
                     <Table striped bordered hover className='custom-table mt-4'>
+                        
                         <thead>
-                            <tr>
-                                <th>Sr No</th>
-                                <th>ATM ID</th>
-                                <th>Camera 4 Status</th>
-                                <th>Up/Down</th>
-                                <th>Router Ip</th>
-                                <th>Last Communication</th>
-                                <th>Disk</th>
-                                <th>Dvr Type</th>
-                                <th>Recording From</th>
-                                <th>Recording To</th>
-
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {post.length > 0 ? (
-                                currentPost.map((users, index) => {
-                                    return (
-                                        <tr key={index}>
-                                            <td>{index + 1}</td>
-                                            <td style={{ color: 'darkblue', fontWeight: 'bold', fontSize: '15px' }}>{users.atmid}</td>
-                                            <td style={{ color: 'red', fontWeight: 'bold', fontSize: '15px' }}>{users.cam4}</td>
-                                            <td>
-                                                {users.login_status === 'working' ? (
-                                                    <FiArrowUp style={{ color: 'green', fontSize: '20px' }} />
-                                                ) : (
-                                                    <FiArrowDown style={{ color: 'red', fontSize: '20px' }} />
-                                                )}
-                                            </td>
-                                            <td style={{ color: 'skyblue', fontWeight: 'bold', fontSize: '15px' }}>{users.ip}</td>
-                                            <td>{users.last_communication}</td>
-                                            <td style={{ color: users.hdd_status === 'working' ? 'green' : 'red', fontWeight: 'bold', fontSize: '15px' }}>
-                                                {users.hdd_status}
-                                            </td>
-                                            <td>{users.dvrtype}</td>
-                                            <td>{users.recording_from}</td>
-                                            <td>{users.recording_to}</td>
-
-                                        </tr>
-                                    );
-                                })
-                            ) : (
                                 <tr>
-                                    <td colSpan='10'>Loading...</td>
+                                    <th>Sr No</th>
+                                    <th>ATM ID</th>
+                                    <th>
+                                        Up/Down
+                                    </th>
+                                    <th>Device Time</th>
+                                    <th>City</th>
+                                    <th>State</th>
+                                    <th>Zone</th>
+                                    <th>HDD Status</th>
+                                    <th>Last Communication</th>
+                                    <th>Router Ip</th>
+                                    <th>Dvr type</th>
+                                    <th>Camera Status</th>
+                                    <th>Rec From</th>
+                                    <th>Rec To</th>
                                 </tr>
-                            )}
+                            </thead>
+                        
+                        <tbody>
+                        {post.length > 0 ? (
+                                    post.map((user, index) => (
+                                        <Suspense fallback={<Fallback />} key={index}>
+                                            <TableRow users={user} index={index} />
+                                        </Suspense>))
+                                ) : (
+                                    <tr>
+                                        <td colSpan='12'>No data available.</td>
+                                    </tr>
+                                )}
                         </tbody>
                     </Table>
                     <ReactPaginate
-                        previousLabel={"<"}
-                        nextLabel={">"}
-                        pageCount={PageCount}
-                        onPageChange={ChangePage}
-                        containerClassName={"paginationBttns"}
-                        activeClassName={"paginationActive"}
+                        previousLabel={'<'}
+                        nextLabel={'>'}
+                        pageCount={Math.ceil(totalCount / postPerPage)}
+                        onPageChange={handlePageClick}
+                        containerClassName={'paginationBttns'}
+                        activeClassName={'paginationActive'}
                         disableInitialCallback={true}
-                        initialPage={0}
-                    ></ReactPaginate>
+                        initialPage={number - 1}
+                    />
                 </div>
             )}
         </div>
-    )
-}
+    );
+};
 
-export default ExampleTwo
+export default SiteTable;

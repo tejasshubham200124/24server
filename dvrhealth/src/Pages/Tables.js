@@ -2,12 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Table } from 'react-bootstrap'
 import { Card } from 'antd';
 import axios from 'axios';
-import { AiOutlineCamera } from 'react-icons/ai'
 import { BsRouter } from 'react-icons/bs'
 import { MdHttp } from 'react-icons/md'
 import { BiVideoRecording } from 'react-icons/bi'
+import { FaRegClock } from 'react-icons/fa'
+import { Link } from 'react-router-dom';
+
 const Tables = () => {
     const [post, setPost] = useState([]);
+    const [count, setCount] = useState(0)
+    const [notAvailable,setNotAvailable]=useState(0)
+    const [timeDiff,setTimeDiff]=useState(0)
 
     useEffect(() => {
         axios.get('http://localhost:8000/30DaysAging')
@@ -20,6 +25,30 @@ const Tables = () => {
                 console.error(error);
             });
     }, []);
+
+    useEffect(() => {
+
+        fetch('http://localhost:8000/30DaysAgingCount')
+            .then(response => response.json())
+            .then(data => setCount(data.count))
+            .catch(error => console.error('Error fetching number of offline sites:', error));
+    }, []);
+
+
+    useEffect(() => {
+        fetch('http://localhost:8000/RecNotAvailableCount')
+            .then(response => response.json())
+            .then(data => setNotAvailable(data.recnotavailable))
+            .catch(error => console.error('Error fetching number of offline sites:', error));
+    }, []);
+
+    useEffect(() => {
+        fetch('http://localhost:8000/RecNotAvailableCount')
+            .then(response => response.json())
+            .then(data => setTimeDiff(data.time_difference_count))
+            .catch(error => console.error('Error fetching number of offline sites:', error));
+    }, []);
+
     return (
         <div className='content'>
             <div className='third-part'>
@@ -34,7 +63,7 @@ const Tables = () => {
                     }}
                 >
                     <h6>Aging Sites more than a month</h6>
-                    <h6><span className='clr'>( 108 )</span> Total sites</h6>
+                    <h6><span className='clr'> ( {count} )</span> Total sites</h6>
                     <Table striped bordered hover className='custom-table mt-4'>
                         <thead>
                             <tr>
@@ -69,7 +98,9 @@ const Tables = () => {
                         </tbody>
                     </Table>
                     <div className="show-all-button-container">
-                        <button className="show-all-button">Show All Sites</button>
+                        <Link to="/admin/AgingMoreThan30" style={{ textDecoration: 'none', display: 'block', width: '100%' }}>
+                            <button className="show-all-button">Show All Sites</button>
+                        </Link>
                     </div>
                 </Card>
             </div>
@@ -91,7 +122,7 @@ const Tables = () => {
                                 <h4 class="my-1 text-info">69</h4>
 
                             </div>
-                            <div class="widgets-icons-2 rounded-circle bg-gradient-scooter text-white ms-auto"><MdHttp />
+                            <div class="widgets-icons-2 rounded-circle bg-gradient-ohhappiness text-white ms-auto"><MdHttp />
                             </div>
                         </div>
                     </Card>
@@ -108,7 +139,7 @@ const Tables = () => {
                                 <p class="mb-0 text-secondary">RTSP</p>
                                 <h4 class="my-1 text-info">69</h4>
                             </div>
-                            <div class="widgets-icons-2 rounded-circle bg-gradient-scooter text-white ms-auto"><BiVideoRecording />
+                            <div class="widgets-icons-2 rounded-circle bg-gradient-blooker5 text-white ms-auto"><BiVideoRecording />
                             </div>
                         </div>
                     </Card>
@@ -126,7 +157,7 @@ const Tables = () => {
                                 <h4 class="my-1 text-info">69</h4>
 
                             </div>
-                            <div class="widgets-icons-2 rounded-circle bg-gradient-scooter text-white ms-auto"><BsRouter />
+                            <div class="widgets-icons-2 rounded-circle bg-gradient-bloody text-white ms-auto"><BsRouter />
                             </div>
                         </div>
                     </Card>
@@ -139,15 +170,16 @@ const Tables = () => {
                             borderRadius: '15px',
                             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                             padding: '16px',
-                            backgroundImage: 'url(/camera.png)', // Directly reference the image
+                            backgroundImage: 'url(/camera.png)',
                             backgroundSize: '100% 100%',
-                            backgroundRepeat: 'no-repeat', // Prevent repeating the background
+                            backgroundRepeat: 'no-repeat',
                         }}
                     >
                         <div class="d-flex align-items-center ">
                             <div>
-                                <p class="mb-0 text-secondary">Recording not available </p>
-                                <h4 class="my-1 text-info">5266</h4>
+                                <p class="mb-0 text-secondary ">Recording not available </p>
+                                <Link to='/admin/RecNotAvailable' style={{ textDecoration: 'none' }}><h5 class="my-1 neveronsi2">{notAvailable}</h5></Link>
+                                
                             </div>
                         </div>
                     </Card>
@@ -163,11 +195,14 @@ const Tables = () => {
                             <div class="d-flex align-items-center mt-2">
                                 <div>
                                     <p class="mb-0 text-secondary">Time Difference</p>
-                                    <h4 class="my-1 text-info">69</h4>
+                                    <h4 class="my-1 text-info">{timeDiff}</h4>
 
                                 </div>
-                                <div class="widgets-icons-2 rounded-circle bg-gradient-scooter text-white ms-auto"><AiOutlineCamera />
+                                <div class="widgets-icons-2 rounded-circle bg-gradient-scooter text-white ms-auto"><FaRegClock />
                                 </div>
+                            </div>
+                            <div className='d-flex justify-content-center mt-2'>
+                                <img src="/images.png" alt="Your Image" width="180" height="100" />
                             </div>
                         </Card>
                     </div>

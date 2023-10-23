@@ -3,7 +3,7 @@ import { Table } from 'react-bootstrap'
 import ReactPaginate from "react-paginate";
 import axios from 'axios';
 import * as XLSX from 'xlsx';
-import { FiArrowUp, FiArrowDown } from 'react-icons/fi'
+
 
 const NeverOn = () => {
     const [post, setPost] = useState([]);
@@ -18,7 +18,7 @@ const NeverOn = () => {
         const fileType =
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
-        const fileName = 'Cam4_NotWorkingReport';
+        const fileName = 'NeverOnSites';
 
         const ws = XLSX.utils.json_to_sheet(filteredPosts);
         const wb = { Sheets: { data: ws }, SheetNames: ['data'] };
@@ -72,14 +72,8 @@ const NeverOn = () => {
     return (
         <div>
             {loading && (
-                <div id="page">
-                    <div id="container">
-                        <div id="ring"></div>
-                        <div id="ring"></div>
-                        <div id="ring"></div>
-                        <div id="ring"></div>
-                        <div id="h3">loading..</div>
-                    </div>
+                  <div className="loader-container">
+                  <div className="loader"></div>
                 </div>
             )}
             {!loading && post.length > 0 && (
@@ -109,7 +103,7 @@ const NeverOn = () => {
                                 <th>Sr No</th>
                                 <th>ATM ID</th>
                                 <th>Router Ip</th>
-                                <th>City</th>
+                                <th >City</th>
                                 <th>State</th>
                                 <th>Zone</th>
                                 <th>Site Address</th>
@@ -125,10 +119,10 @@ const NeverOn = () => {
                                             <td>{index + 1}</td>
                                             <td style={{ color: 'darkblue', fontWeight: 'bold', fontSize: '15px' }}>{users.atmid}</td>                                         
                                             <td style={{ color: 'skyblue', fontWeight: 'bold', fontSize: '15px' }}>{users.ip}</td>
-                                            <td>{users.CITY}</td>                                            
-                                            <td>{users.STATE}</td>
-                                            <td>{users.ZONE}</td>
-                                            <td>{users.SiteAddress}</td>
+                                            <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.CITY}</td>                                            
+                                            <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.STATE}</td>
+                                            <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.ZONE}</td>
+                                            <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.SiteAddress}</td>
 
                                         </tr>
                                     );

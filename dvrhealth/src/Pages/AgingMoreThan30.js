@@ -43,9 +43,9 @@ const AgingMoreThan30 = () => {
         )
         : [];
 
-    const handleSearch = e => {
-        setSearchQuery(e.target.value);
-    };
+    // const handleSearch = e => {
+    //     setSearchQuery(e.target.value);
+    // };
 
 
     const currentPost = filteredPosts.slice(firstPost, lastPost);
@@ -94,7 +94,7 @@ const AgingMoreThan30 = () => {
                         <th>State</th>
                         <th>Zone</th>
                         <th>No of Days</th>
-                        <th>Time Difference</th>
+                        {/* <th>Time Difference</th> */}
                     </tr>
                 </thead>
                 <tbody>
@@ -111,15 +111,15 @@ const AgingMoreThan30 = () => {
                                             <FiArrowDown style={{ color: 'red', fontSize: '20px' }} />
                                         )}
                                     </td>
-                                    <td>{users.cdate}</td>
-                                    <td style={{ color: users.hdd_status === 'working' ? 'green' : 'red', fontWeight: 'bold', fontSize: '15px' }}>
+                                    <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{users.cdate}</td>
+                                    <td style={{ color: users.hdd_status === 'working' ? 'green' : 'red', fontWeight: 'bold', fontSize: '13px' }}>
                                         {users.hdd_status}
                                     </td>
-                                    <td>{users.city}</td>
-                                    <td>{users.state}</td>
-                                    <td>{users.zone}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.city}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.state}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.zone}</td>
                                     <td style={{ color: 'red', fontWeight: 'bold', fontSize: '15px' }}>{users.days_difference}</td>
-                                    <td style={{ color: 'red', fontWeight: 'bold', fontSize: '15px' }}>{users.time_difference_hours_minutes}</td>
+                                    {/* <td style={{ color: 'red', fontWeight: 'bold', fontSize: '15px' }}>{users.time_difference_hours_minutes}</td> */}
                                 </tr>
                             );
                         })
