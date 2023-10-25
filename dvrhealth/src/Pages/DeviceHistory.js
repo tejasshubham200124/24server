@@ -40,7 +40,7 @@ const DeviceHistory = () => {
     const fetchData = (pageNumber) => {
         setLoading(true);
         axios
-            .get(`http://localhost:8000/devicehistoryTwo/${atmId}?page=${pageNumber}&recordsPerPage=${postPerPage}`)
+            .get(`http://192.168.100.24:8000/devicehistoryTwo/${atmId}?page=${pageNumber}&recordsPerPage=${postPerPage}`)
             .then((response) => {
                 if (response.data && response.data.data) {
                     setPost(response.data.data);
@@ -70,7 +70,7 @@ const DeviceHistory = () => {
     const exportToExcel = async () => {
         try {
            
-            const response = await axios.get('http://localhost:8000/DeviceHistoryExport');
+            const response = await axios.get('http://192.168.100.24:8000/DeviceHistoryExport');
             const data = response.data.data;
     
            

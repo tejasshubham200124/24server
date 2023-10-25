@@ -25,7 +25,7 @@ const OnlineSiteTable = () => {
     const fetchAllSitesData = (page) => {
         setLoading(true);
 
-        let apiUrl = `http://localhost:8000/OnlineSiteDetails?page=${page}`;
+        let apiUrl = `http://192.168.100.24:8000/OnlineSiteDetails?page=${page}`;
 
         if (searchTerm) {
             apiUrl += `&atmid=${searchTerm}`;
@@ -70,7 +70,7 @@ const OnlineSiteTable = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await axios.get('http://localhost:8000/ExportOnlineSites');
+                const response = await axios.get('http://192.168.100.24:8000/ExportOnlineSites');
                 setData(response.data.data);
             } catch (error) {
                 console.error('Error fetching data from API:', error);

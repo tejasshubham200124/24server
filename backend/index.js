@@ -17,6 +17,7 @@ const db = mysql.createConnection({
     database: 'esurv'
 });
 
+
 // const db = mysql.createConnection({
 //     host: 'localhost',
 //     user: 'root',

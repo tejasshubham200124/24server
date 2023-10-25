@@ -52,7 +52,7 @@ function App() {
     }
 
     axios
-      .get('http://localhost:8000/verify_id')
+      .get('http://192.168.100.24:8000/verify_id')
       .then((response) => {
         try {
           const userDataArray = response.data;

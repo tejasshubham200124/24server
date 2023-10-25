@@ -55,7 +55,7 @@ const AgingMoreThan30 = () => {
     };
 
     useEffect(() => {
-        axios.get('http://localhost:8000/30DaysAgingDetails')
+        axios.get('http://192.168.100.24:8000/30DaysAgingDetails')
             .then(response => {
                 if (response.data && response.data.length > 0) {
                     setPost(response.data);

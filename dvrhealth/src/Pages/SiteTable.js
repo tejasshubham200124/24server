@@ -26,7 +26,7 @@ const SiteTable = () => {
     const fetchAllSitesData = (page) => {
         setLoading(true);
 
-        let apiUrl = `http://localhost:8000/AllSites?page=${page}`;
+        let apiUrl = `http://192.168.100.24:8000/AllSites?page=${page}`;
 
         if (searchTerm) {
             apiUrl += `&atmid=${searchTerm}`;

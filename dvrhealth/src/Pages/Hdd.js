@@ -6,7 +6,7 @@ import axios from 'axios';
 const Hdd = () => {
     const [summaryData, setSummaryData] = useState([])
     useEffect(() => {
-        axios.get('http://localhost:8000/summaryData')
+        axios.get('http://192.168.100.24:8000/summaryData')
             .then(response => {
                 if (response.data && response.data.length > 0) {
                     setSummaryData(response.data);

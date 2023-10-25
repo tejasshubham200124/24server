@@ -53,7 +53,7 @@ const NoDiscIdle = () => {
     };
 
     useEffect(() => {
-        axios.get('http://localhost:8000/noDiscIdleSites')
+        axios.get('http://192.168.100.24:8000/noDiscIdleSites')
             .then(response => {
                 if (response.data && response.data.length > 0) {
                     setPost(response.data);

@@ -13,7 +13,7 @@ function SignUp() {
 
   const handleRegister = () => {
     const newUser = { username, email, password };
-    axios.post('http://localhost:8000/register', newUser)
+    axios.post('http://192.168.100.24:8000/register', newUser)
       .then(response => {
         console.log(response.data.message);
         if (response.status === 201) {

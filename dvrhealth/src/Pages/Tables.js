@@ -15,7 +15,7 @@ const Tables = () => {
     const [timeDiff,setTimeDiff]=useState(0)
 
     useEffect(() => {
-        axios.get('http://localhost:8000/30DaysAging')
+        axios.get('http://192.168.100.24:8000/30DaysAging')
             .then(response => {
                 if (response.data && response.data.length > 0) {
                     setPost(response.data);
@@ -28,7 +28,7 @@ const Tables = () => {
 
     useEffect(() => {
 
-        fetch('http://localhost:8000/30DaysAgingCount')
+        fetch('http://192.168.100.24:8000/30DaysAgingCount')
             .then(response => response.json())
             .then(data => setCount(data.count))
             .catch(error => console.error('Error fetching number of offline sites:', error));
@@ -36,14 +36,14 @@ const Tables = () => {
 
 
     useEffect(() => {
-        fetch('http://localhost:8000/RecNotAvailableCount')
+        fetch('http://192.168.100.24:8000/RecNotAvailableCount')
             .then(response => response.json())
             .then(data => setNotAvailable(data.recnotavailable))
             .catch(error => console.error('Error fetching number of offline sites:', error));
     }, []);
 
     useEffect(() => {
-        fetch('http://localhost:8000/RecNotAvailableCount')
+        fetch('http://192.168.100.24:8000/TimeDifferenceCount')
             .then(response => response.json())
             .then(data => setTimeDiff(data.time_difference_count))
             .catch(error => console.error('Error fetching number of offline sites:', error));
@@ -195,7 +195,9 @@ const Tables = () => {
                             <div class="d-flex align-items-center mt-2">
                                 <div>
                                     <p class="mb-0 text-secondary">Time Difference</p>
-                                    <h4 class="my-1 text-info">{timeDiff}</h4>
+                                    <Link to='/admin/TimeDIfference' style={{ textDecoration: 'none' }}>
+                                        <h4 class="my-1 text-info">{timeDiff}</h4>
+                                    </Link>
 
                                 </div>
                                 <div class="widgets-icons-2 rounded-circle bg-gradient-scooter text-white ms-auto"><FaRegClock />

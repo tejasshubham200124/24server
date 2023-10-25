@@ -53,7 +53,7 @@ const Abnormal = () => {
     };
 
     useEffect(() => {
-        axios.get('http://localhost:8000/abnormalSites')
+        axios.get('http://192.168.100.24:8000/abnormalSites')
             .then(response => {
                 if (response.data && response.data.length > 0) {
                     setPost(response.data);

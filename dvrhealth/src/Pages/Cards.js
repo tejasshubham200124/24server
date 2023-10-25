@@ -12,7 +12,7 @@ const Cards = () => {
     });
 
     useEffect(() => {
-        fetch('http://localhost:8000/CameraNotWorking')
+        fetch('http://192.168.100.24:8000/CameraNotWorking')
             .then(response => response.json())
             .then(data => {
                 setCameraNotWorking({
