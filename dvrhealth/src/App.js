@@ -33,8 +33,9 @@ import TimeDifference from './Pages/TimeDifference';
 import Login from './Pages/Login';
 import axios from 'axios';
 import SignUp from './Pages/SignUp';
-import { getUserId, setUserSession } from './Utils/Common';
+import { getUserId, setUserSession ,removeUserSession } from './Utils/Common';
 import RecNotAvailable from './Pages/RecNotAvailable';
+import Logout from './Utils/Logout';
 
 
 function App() {
@@ -52,7 +53,7 @@ function App() {
     }
 
     axios
-      .get('http://192.168.100.24:8000/verify_id')
+      .get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/verify_id`)
       .then((response) => {
         try {
           const userDataArray = response.data;
@@ -69,7 +70,7 @@ function App() {
         }
       })
       .catch((error) => {
-        // removeUserSession();
+        removeUserSession();
         console.error('Error:', error);
         navigate('/');
       });
@@ -95,7 +96,7 @@ function App() {
         <Route path="CameraFour" element={<CameraFour />} />
         <Route path="DeviceHistory/:atmId" element={<DeviceHistory />} />
         <Route path="Tables" element={<Tables />} />
-        <Route path="ExampleTwo" element={<ExampleTwo />} />
+        <Route path="ExampleTwo/:atmId" element={<ExampleTwo />} />
         <Route path="SiteTable" element={<SiteTable />} />
         <Route path="Hdd" element={<Hdd />} />
         <Route path="TableRow" element={<TableRow />} />
@@ -111,6 +112,7 @@ function App() {
         <Route path="AgingMoreThan30" element={<AgingMoreThan30 />} />
         <Route path="TimeDifference" element={<TimeDifference />} />
         <Route path="RecNotAvailable" element={<RecNotAvailable />} />
+        <Route path="Logout" element={<Logout />} />
 
       </Route>
     </Routes>

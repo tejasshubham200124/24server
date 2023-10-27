@@ -53,7 +53,7 @@ const Unformatted = () => {
     };
 
     useEffect(() => {
-        axios.get('http://192.168.100.24:8000/unformattedSites')
+        axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/unformattedSites`)
             .then(response => {
                 if (response.data && response.data.length > 0) {
                     setPost(response.data);

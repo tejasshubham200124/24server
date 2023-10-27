@@ -12,10 +12,11 @@ function App() {
   const [password, setPassword] = useState('')
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const handleLogin = async () => {
 
+
+  const handleLogin = async () => {
     try {
-      const response = await fetch('http://192.168.100.24:8000/login', {
+      const response = await fetch(`${process.env.REACT_APP_DVRHEALTH_API_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -25,7 +25,7 @@ const OfflineSiteTable = () => {
     const fetchAllSitesData = (page) => {
         setLoading(true);
 
-        let apiUrl = `http://192.168.100.24:8000/OfflineSiteDetails?page=${page}`;
+        let apiUrl = `${process.env.REACT_APP_DVRHEALTH_API_URL}/OfflineSiteDetails?page=${page}`;
 
         if (searchTerm) {
             apiUrl += `&atmid=${searchTerm}`;
@@ -70,7 +70,7 @@ const OfflineSiteTable = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await axios.get('http://192.168.100.24:8000/ExportOfflineSites');
+                const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/ExportOfflineSites`);
                 setData(response.data.data);
             } catch (error) {
                 console.error('Error fetching data from API:', error);

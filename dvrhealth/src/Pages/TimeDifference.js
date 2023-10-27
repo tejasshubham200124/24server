@@ -14,6 +14,7 @@ const TimeDifference = () => {
 
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
+  const [data, setData] = useState(0)
 
   const firstPost = (number - 1) * postPerPage;
   const lastPost = Math.min(firstPost + postPerPage, totalCount);
@@ -25,7 +26,7 @@ const TimeDifference = () => {
   const fetchAllSitesData = (page) => {
     setLoading(true);
 
-    let apiUrl = `http://192.168.100.24:8000/TimeDifferenceDetails?page=${page}`;
+    let apiUrl = `${process.env.REACT_APP_DVRHEALTH_API_URL}/TimeDifferenceDetails?page=${page}`;
 
     if (searchTerm) {
       apiUrl += `&atmid=${searchTerm}`;
@@ -67,27 +68,27 @@ const TimeDifference = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get('http://192.168.100.24:8000/TimeDifferenceExport');
-            setData(response.data.data);
-        } catch (error) {
-            console.error('Error fetching data from API:', error);
-        }
-        setLoading(false);
+      setLoading(true);
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/TimeDifferenceExport`);
+        setData(response.data.data);
+      } catch (error) {
+        console.error('Error fetching data from API:', error);
+      }
+      setLoading(false);
     };
 
     fetchData();
-}, []);
+  }, []);
 
-  
+
 
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
     XLSX.writeFile(wb, 'TimeDifference.xlsx');
-};
+  };
 
 
   return (

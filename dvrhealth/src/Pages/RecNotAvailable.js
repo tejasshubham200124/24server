@@ -24,7 +24,7 @@ const RecNotAvailable = () => {
     const fetchAllSitesData = (page) => {
         setLoading(true);
 
-        let apiUrl = `http://192.168.100.24:8000/RecNotAvailableDetails?page=${page}`;
+        let apiUrl = `${process.env.REACT_APP_DVRHEALTH_API_URL}/RecNotAvailableDetails?page=${page}`;
 
         if (searchTerm) {
             apiUrl += `&atmid=${searchTerm}`;
@@ -69,7 +69,7 @@ const RecNotAvailable = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await axios.get('http://192.168.100.24:8000/RecNotavailableExport');
+                const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/RecNotavailableExport`);
                 setData(response.data.data);
             } catch (error) {
                 console.error('Error fetching data from API:', error);

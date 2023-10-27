@@ -34,7 +34,7 @@ const Home = () => {
 
   useEffect(() => {
 
-    fetch('http://192.168.100.24:8000/TotalSites')
+    fetch(`${process.env.REACT_APP_DVRHEALTH_API_URL}/TotalSites`)
       .then(response => response.json())
       .then(data => setTotalSites(data.atmCount))
       .catch(error => console.error('Error fetching total number of sites:', error));
@@ -42,7 +42,7 @@ const Home = () => {
 
   useEffect(() => {
 
-    fetch('http://192.168.100.24:8000/OnlineSites')
+    fetch(`${process.env.REACT_APP_DVRHEALTH_API_URL}/OnlineSites`)
       .then(response => response.json())
       .then(data => setOnlineSites(data.online_count))
       .catch(error => console.error('Error fetching number of online sites:', error));
@@ -50,7 +50,7 @@ const Home = () => {
 
   useEffect(() => {
 
-    fetch('http://192.168.100.24:8000/OfflineSites')
+    fetch(`${process.env.REACT_APP_DVRHEALTH_API_URL}/OfflineSites`)
       .then(response => response.json())
       .then(data => setOfflineSites(data.offline_count))
       .catch(error => console.error('Error fetching number of offline sites:', error));
@@ -58,14 +58,14 @@ const Home = () => {
 
   useEffect(() => {
 
-    fetch('http://192.168.100.24:8000/hddnotworking')
+    fetch(`${process.env.REACT_APP_DVRHEALTH_API_URL}/hddnotworking`)
       .then(response => response.json())
       .then(data => sethddNotWorking(data.non_ok_hdd_count))
       .catch(error => console.error('Error fetching number of offline sites:', error));
   }, []);
   useEffect(() => {
 
-    fetch('http://192.168.100.24:8000/neveron')
+    fetch(`${process.env.REACT_APP_DVRHEALTH_API_URL}/neveron`)
       .then(response => response.json())
       .then(data => setNeveron(data.neveron))
       .catch(error => console.error('Error fetching number of offline sites:', error));

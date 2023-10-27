@@ -17,3 +17,6 @@ export const getUserId = () => {
     localStorage.setItem('id', JSON.stringify(id));
    
   }
+  export const removeUserSession = () => {
+    localStorage.removeItem('id');   
+  }

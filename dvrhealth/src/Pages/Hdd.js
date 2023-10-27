@@ -6,7 +6,7 @@ import axios from 'axios';
 const Hdd = () => {
     const [summaryData, setSummaryData] = useState([])
     useEffect(() => {
-        axios.get('http://192.168.100.24:8000/summaryData')
+        axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/summaryData`)
             .then(response => {
                 if (response.data && response.data.length > 0) {
                     setSummaryData(response.data);

@@ -15,7 +15,7 @@ const Tables = () => {
     const [timeDiff,setTimeDiff]=useState(0)
 
     useEffect(() => {
-        axios.get('http://192.168.100.24:8000/30DaysAging')
+        axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/30DaysAging`)
             .then(response => {
                 if (response.data && response.data.length > 0) {
                     setPost(response.data);
@@ -28,7 +28,7 @@ const Tables = () => {
 
     useEffect(() => {
 
-        fetch('http://192.168.100.24:8000/30DaysAgingCount')
+        fetch(`${process.env.REACT_APP_DVRHEALTH_API_URL}/30DaysAgingCount`)
             .then(response => response.json())
             .then(data => setCount(data.count))
             .catch(error => console.error('Error fetching number of offline sites:', error));
@@ -36,14 +36,14 @@ const Tables = () => {
 
 
     useEffect(() => {
-        fetch('http://192.168.100.24:8000/RecNotAvailableCount')
+        fetch(`${process.env.REACT_APP_DVRHEALTH_API_URL}/RecNotAvailableCount`)
             .then(response => response.json())
             .then(data => setNotAvailable(data.recnotavailable))
             .catch(error => console.error('Error fetching number of offline sites:', error));
     }, []);
 
     useEffect(() => {
-        fetch('http://192.168.100.24:8000/TimeDifferenceCount')
+        fetch(`${process.env.REACT_APP_DVRHEALTH_API_URL}/TimeDifferenceCount`)
             .then(response => response.json())
             .then(data => setTimeDiff(data.time_difference_count))
             .catch(error => console.error('Error fetching number of offline sites:', error));

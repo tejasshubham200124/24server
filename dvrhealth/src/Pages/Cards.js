@@ -12,7 +12,7 @@ const Cards = () => {
     });
 
     useEffect(() => {
-        fetch('http://192.168.100.24:8000/CameraNotWorking')
+        fetch(`${process.env.REACT_APP_DVRHEALTH_API_URL}/CameraNotWorking`)
             .then(response => response.json())
             .then(data => {
                 setCameraNotWorking({

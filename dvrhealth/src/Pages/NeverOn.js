@@ -55,7 +55,7 @@ const NeverOn = () => {
     };
 
     useEffect(() => {
-        axios.get('http://192.168.100.24:8000/neverondetails')
+        axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/neverondetails`)
             .then(response => {
                 if (response.data && response.data.length > 0) {
                     setPost(response.data);

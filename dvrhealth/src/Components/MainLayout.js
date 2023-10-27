@@ -1,9 +1,19 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
-import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import { Outlet, useNavigate , Link } from 'react-router-dom';
+import { IoMdArrowRoundBack } from 'react-icons/io'
+import { removeUserSession } from '../Utils/Common';
+import { Layout, theme } from 'antd';
 const { Header, Content, Footer } = Layout;
 
+
 const App = () => {
+
+    const navigate = useNavigate();
+    const handleLogout = () => {
+        removeUserSession();
+        navigate('/');
+    }
+
     const {
         token: { colorBgContainer },
     } = theme.useToken();
@@ -20,11 +30,24 @@ const App = () => {
                 }}
             >
 
-                {/* <div className="logo-container">
+
+                <div className="logo-container">
                     <div className="heartbeat-animation">
-                        <img src="logo.jpg" alt="Logo" className="logo" />
+                        <Link to="/admin">
+                            <img src="/logo.jpg" alt="Logo" className="logo" />
+                        </Link>
+
                     </div>
-                </div> */}
+                </div>
+
+
+                <button className="button" onClick={handleLogout}>
+                    <div className="button-box">
+                        <span className="button-elem">
+                            <IoMdArrowRoundBack size={24} style={{ color: 'white' }} />
+                        </span>
+                    </div>
+                </button>
 
             </Header>
             <Content

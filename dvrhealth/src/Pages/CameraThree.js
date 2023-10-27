@@ -55,7 +55,7 @@ const CameraThree = () => {
     };
 
     useEffect(() => {
-        axios.get('http://192.168.100.24:8000/cam3_not_working')
+        axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/cam3_not_working`)
             .then(response => {
                 if (response.data && response.data.length > 0) {
                     setPost(response.data);

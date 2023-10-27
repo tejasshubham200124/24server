@@ -5,7 +5,7 @@ const app = express();
 const xlsxPopulate = require('xlsx-populate');
 const path = require('path');
 const fs = require('fs');
-
+const moment = require('moment');
 
 app.use(express.json());
 const port = 8000;
@@ -196,16 +196,16 @@ app.get('/devicehistory/:atmId', (req, res) => {
 FROM 
     dvr_history 
 WHERE 
-    atmid = ?;
-`, [atmId], (err, result) => {
-        if (err) {
-            console.error('Error fetching history data for ATM ID:', err);
-            res.status(500).json({ error: 'Error fetching history data' });
-        } else {
+    atmid = ?
+ORDER BY last_communication DESC;`, [atmId], (err, result) => {
+    if (err) {
+        console.error('Error fetching history data for ATM ID:', err);
+        res.status(500).json({ error: 'Error fetching history data' });
+    } else {
+        res.status(200).json(result);
+    }
+});
 
-            res.status(200).json(result);
-        }
-    });
 });
 
 
@@ -612,38 +612,13 @@ WHERE
 app.get('/hddcalllog', (req, res) => {
     const query = `
    
-    SELECT
-    dh.atmid,
-    latest_history.last_communication,
-    latest_history.hdd AS from_hdd,
-    dh.hdd AS to_hdd
-FROM
-    dvr_health dh
-JOIN (
-    SELECT
-        atmid,
-        last_communication,
-        hdd
-    FROM
-        dvr_history
-    WHERE
-        (atmid, last_communication) IN (
-            SELECT
-                atmid,
-                MAX(last_communication)
-            FROM
-                dvr_history
-            GROUP BY
-                atmid
-        )
-        AND (hdd IS NOT NULL AND hdd <> '') -- Exclude rows with null or blank hdd
-) AS latest_history ON dh.atmid = latest_history.atmid
-WHERE
-    dh.hdd <> latest_history.hdd
-ORDER BY
-    latest_history.last_communication DESC;
-
-
+    SELECT DISTINCT dh.atmid, dh2.hdd AS previous_status, dh.hdd AS current_status
+    FROM dvr_health dh
+    JOIN dvr_history dh2 ON dh.atmid = dh2.atmid
+    WHERE 
+        DATE(dh2.last_communication) = CURDATE()
+        AND dh.hdd <> dh2.hdd;
+    
     `;
     db.query(query, (err, result) => {
         if (err) {
@@ -1170,6 +1145,73 @@ app.get('/devicehistoryTwo/:atmId', (req, res) => {
         }
     });
 });
+
+
+
+app.get('/devicehistoryThree/:atmId', (req, res) => {
+    const atmId = req.params.atmId;
+    const page = req.query.page || 1;
+    const recordsPerPage = 100;
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+
+    console.log('Received startDate:', startDate);
+    console.log('Received endDate:', endDate);
+
+    let query = `
+    SELECT 
+        *,
+        CASE 
+            WHEN hdd = 'ok' THEN 'working'
+            ELSE 'not working'
+        END AS hdd_status,
+        CASE 
+            WHEN login_status = 0 THEN 'working'
+            ELSE 'not working'
+        END AS login_status,
+        DATE_FORMAT(last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+        DATE_FORMAT(recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
+        DATE_FORMAT(recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
+        DATE_FORMAT(cdate, '%Y-%m-%d %H:%i:%s') AS cdate
+    FROM 
+        dvr_history 
+    WHERE 
+        atmid = ?`;
+
+    
+        if (startDate && endDate) {
+            query += ` AND last_communication >= ? AND last_communication <= ?`;
+        }
+
+    const totalCountQuery = `SELECT COUNT(*) AS totalCount FROM dvr_history WHERE atmid = ?`;
+
+    db.query(totalCountQuery, [atmId], (err, countResult) => {
+        if (err) {
+            console.error('Error fetching total count of records:', err);
+            res.status(500).json({ error: 'Error fetching total count of records' });
+        } else {
+            const totalCount = countResult[0].totalCount;
+
+            const offset = (page - 1) * recordsPerPage;
+
+            query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
+
+            db.query(query, [atmId, startDate, endDate], (err, result) => {
+                if (err) {
+                    console.error('Error fetching history data for ATM ID:', err);
+                    res.status(500).json({ error: 'Error fetching history data' });
+                } else {
+                    res.status(200).json({ data: result, totalCount });
+                }
+            });
+        }
+    });
+});
+
+
+
+
+
 
 
 app.get('/AllSites', (req, res) => {

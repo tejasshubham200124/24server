@@ -5,42 +5,45 @@ import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { FiArrowUp, FiArrowDown } from 'react-icons/fi';
 import { useParams } from 'react-router-dom';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+
 
 const DeviceHistory = () => {
     const [post, setPost] = useState([]);
     const [number, setNumber] = useState(1);
-    const [postPerPage] = useState(50);
+    const [postPerPage] = useState(100);
     const [loading, setLoading] = useState(true);
     const [totalCount, setTotalCount] = useState(0);
     const { atmId } = useParams();
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
 
-    // useEffect(() => {
-    //     axios
-    //         .get(`http://localhost:8000/devicehistoryTwo/${atmId}`)
-    //         .then((response) => {
-    //             if (response.data && response.data.data) {
-    //                 setPost(response.data.data);
-    //                 setTotalCount(response.data.totalCount); 
-    //                 setLoading(false);
-    //             } else {
-    //                 console.log('No data received from API.');
-    //             }
-    //         })
-    //         .catch((error) => {
-    //             console.error('Error fetching data:', error);
-    //             setLoading(false);
-    //         });
-    // }, [atmId]);
-
-    // const handlePageClick = (selected) => {
-    //     const newPageNumber = selected.selected + 1;
-    //     setNumber(newPageNumber);
-    // };
-
-    const fetchData = (pageNumber) => {
+    const fetchData = (pageNumber, atmId, startDate, endDate) => {
         setLoading(true);
+        const apiUrl = process.env.REACT_APP_DVRHEALTH_API_URL;
+        const postPerPage = 100;
+
+        const formattedStartDate = startDate
+            ? startDate.toISOString().slice(0, 19).replace('T', ' ')
+            : null;
+
+        const formattedEndDate = endDate
+            ? new Date(endDate.getTime() + 24 * 60 * 60 * 1000)
+                .toISOString()
+                .slice(0, 19)
+                .replace('T', ' ')
+            : null;
+
+
+        let apiUrlWithEndpoint = `${apiUrl}/devicehistoryThree/${atmId}?page=${pageNumber}&recordsPerPage=${postPerPage}`;
+
+        if (formattedStartDate && formattedEndDate) {
+            apiUrlWithEndpoint += `&startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+        }
+
         axios
-            .get(`http://192.168.100.24:8000/devicehistoryTwo/${atmId}?page=${pageNumber}&recordsPerPage=${postPerPage}`)
+            .get(apiUrlWithEndpoint)
             .then((response) => {
                 if (response.data && response.data.data) {
                     setPost(response.data.data);
@@ -56,48 +59,38 @@ const DeviceHistory = () => {
             });
     };
 
+
     useEffect(() => {
-        fetchData(number);
-    }, [atmId, number]);
+        fetchData(number, atmId, startDate, endDate);
+    }, [atmId, number, startDate, endDate]);
 
     const handlePageClick = (selected) => {
         const newPageNumber = selected.selected + 1;
         setNumber(newPageNumber);
-        fetchData(newPageNumber);
+        fetchData(newPageNumber, startDate, endDate);
     };
 
 
     const exportToExcel = async () => {
         try {
-           
-            const response = await axios.get('http://192.168.100.24:8000/DeviceHistoryExport');
+
+            const response = await axios.get`${process.env.REACT_APP_DVRHEALTH_API_URL}/DeviceHistoryExport`;
             const data = response.data.data;
-    
-           
             const ws = XLSX.utils.json_to_sheet(data);
-    
-           
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-       
             const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
             const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    
-            // Create a URL for the Blob
             const dataUrl = URL.createObjectURL(blob);
-    
-            // Create an anchor element to trigger the download
             const link = document.createElement('a');
             link.href = dataUrl;
             link.download = 'DeviceHistory.xlsx';
-    
-            // Trigger a click event on the anchor element
             link.click();
         } catch (error) {
             console.error('Error exporting to Excel:', error);
         }
     }
-    
+
     return (
         <div>
             {loading && (
@@ -108,14 +101,62 @@ const DeviceHistory = () => {
 
             {!loading && post.length > 0 && (
                 <div>
-                    <div className="row">
-                        <div className="col-6 pt-2">
+                    {/* <div className="row">
+                        <div className="col-6 pt-3">
                             <h6>Device History</h6>
-                            <button onClick={exportToExcel} className="btn btn-primary mt-4">
-                                Export to Excel
-                            </button>
+                        </div>
+                        <div className="col-6 d-flex justify-content-end">
+                            <div className='col-4 text-end login-form2'>
+                                <button onClick={exportToExcel} className="btn btn-primary mt-3">
+                                    Export to Excel
+                                </button>
+                            </div>
                         </div>
                     </div>
+                    <div className='date'>
+                        <span style={{ color: 'red', fontWeight: '600', fontSize: '15px' }}>Select date Range :</span>
+                        <div className="date-picker-container">
+                            <DatePicker
+                                selected={startDate}
+                                onChange={(date) => setStartDate(date)}
+                                placeholderText="Start Date"
+                                className="custom-date-picker" // Add your custom class name
+                            />
+                            <DatePicker
+                                selected={endDate}
+                                onChange={(date) => setEndDate(date)}
+                                placeholderText="End Date"
+                                className="custom-date-picker" // Add your custom class name
+                            />
+                        </div>
+                    </div> */}
+
+                    <div className="d-flex justify-content-between align-items-center">
+                        <h6 style={{ color: '#0851a6', fontWeight: '600', fontSize: '15px' }}>Device History</h6>
+
+                        <div className='date'>
+                            <span style={{ color: '#0851a6', fontWeight: '600', fontSize: '15px' }}>Select Date Range :</span>
+                            <div className="date-picker-container">
+                                <DatePicker
+                                    selected={startDate}
+                                    onChange={(date) => setStartDate(date)}
+                                    placeholderText="Start Date"
+                                    className="custom-date-picker" 
+                                />
+                                <DatePicker
+                                    selected={endDate}
+                                    onChange={(date) => setEndDate(date)}
+                                    placeholderText="End Date"
+                                    className="custom-date-picker" 
+                                />
+                            </div>
+                        </div>
+                        <button onClick={exportToExcel} className="btn btn-primary ">
+                            Export to Excel
+                        </button>
+
+                    </div>
+
                     <Table striped bordered hover className="custom-table mt-4">
                         <thead>
                             <tr>

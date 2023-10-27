@@ -53,7 +53,7 @@ const Abnormal = () => {
     };
 
     useEffect(() => {
-        axios.get('http://192.168.100.24:8000/abnormalSites')
+        axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/abnormalSites`)
             .then(response => {
                 if (response.data && response.data.length > 0) {
                     setPost(response.data);
@@ -68,7 +68,6 @@ const Abnormal = () => {
             <div className="row">
                 <div className="col-6 pt-3">
                     <h6>HDD Status Report for <span style={{ color: 'red', fontWeight: 'bold', fontSize: '15px' }}>( Abnormal )</span></h6>
-
                 </div>
                 <div className="col-6 d-flex justify-content-end">
                     <div className='col-4 text-end login-form2'>
