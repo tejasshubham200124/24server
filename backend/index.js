@@ -1093,61 +1093,6 @@ app.get('/OnlineSiteDetails', (req, res) => {
 });
 
 
-app.get('/devicehistoryTwo/:atmId', (req, res) => {
-    const atmId = req.params.atmId;
-    const page = req.query.page || 1;
-    const recordsPerPage = 50;
-
-    console.log('Received search ATM ID:', atmId);
-
-    let query = `
-    SELECT 
-        *,
-        CASE 
-            WHEN hdd = 'ok' THEN 'working'
-            ELSE 'not working'
-        END AS hdd_status,
-        CASE 
-            WHEN login_status = 0 THEN 'working'
-            ELSE 'not working'
-        END AS login_status,
-        DATE_FORMAT(last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
-        DATE_FORMAT(recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
-        DATE_FORMAT(recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
-        DATE_FORMAT(cdate, '%Y-%m-%d %H:%i:%s') AS cdate
-    FROM 
-        dvr_history 
-    WHERE 
-        atmid = ?`;
-
-
-    const totalCountQuery = `SELECT COUNT(*) AS totalCount FROM dvr_history WHERE atmid = ?`;
-
-    db.query(totalCountQuery, [atmId], (err, countResult) => {
-        if (err) {
-            console.error('Error fetching total count of records:', err);
-            res.status(500).json({ error: 'Error fetching total count of records' });
-        } else {
-            const totalCount = countResult[0].totalCount;
-
-            const offset = (page - 1) * recordsPerPage;
-
-            query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
-
-            db.query(query, [atmId], (err, result) => {
-                if (err) {
-                    console.error('Error fetching history data for ATM ID:', err);
-                    res.status(500).json({ error: 'Error fetching history data' });
-                } else {
-                    res.status(200).json({ data: result, totalCount });
-                }
-            });
-        }
-    });
-});
-
-
-
 app.get('/devicehistoryThree/:atmId', (req, res) => {
     const atmId = req.params.atmId;
     const page = req.query.page || 1;
@@ -1178,10 +1123,12 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
     WHERE 
         atmid = ?`;
 
-    
-        if (startDate && endDate) {
-            query += ` AND last_communication >= ? AND last_communication <= ?`;
-        }
+    if (startDate && endDate) {
+        query += ` AND last_communication >= ? AND last_communication <= ?`;
+    }
+
+   
+    query += ` ORDER BY last_communication DESC`;
 
     const totalCountQuery = `SELECT COUNT(*) AS totalCount FROM dvr_history WHERE atmid = ?`;
 
@@ -1207,6 +1154,69 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
         }
     });
 });
+
+
+
+
+// app.get('/devicehistoryThree/:atmId', (req, res) => {
+//     const atmId = req.params.atmId;
+//     const page = req.query.page || 1;
+//     const recordsPerPage = 100;
+//     const startDate = req.query.startDate;
+//     const endDate = req.query.endDate;
+
+//     console.log('Received startDate:', startDate);
+//     console.log('Received endDate:', endDate);
+
+//     let query = `
+//     SELECT 
+//         *,
+//         CASE 
+//             WHEN hdd = 'ok' THEN 'working'
+//             ELSE 'not working'
+//         END AS hdd_status,
+//         CASE 
+//             WHEN login_status = 0 THEN 'working'
+//             ELSE 'not working'
+//         END AS login_status,
+//         DATE_FORMAT(last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+//         DATE_FORMAT(recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
+//         DATE_FORMAT(recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
+//         DATE_FORMAT(cdate, '%Y-%m-%d %H:%i:%s') AS cdate
+//     FROM 
+//         dvr_history 
+//     WHERE 
+//         atmid = ?`;
+
+    
+//         if (startDate && endDate) {
+//             query += ` AND last_communication >= ? AND last_communication <= ?`;
+//         }
+
+//     const totalCountQuery = `SELECT COUNT(*) AS totalCount FROM dvr_history WHERE atmid = ?`;
+
+//     db.query(totalCountQuery, [atmId], (err, countResult) => {
+//         if (err) {
+//             console.error('Error fetching total count of records:', err);
+//             res.status(500).json({ error: 'Error fetching total count of records' });
+//         } else {
+//             const totalCount = countResult[0].totalCount;
+
+//             const offset = (page - 1) * recordsPerPage;
+
+//             query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
+
+//             db.query(query, [atmId, startDate, endDate], (err, result) => {
+//                 if (err) {
+//                     console.error('Error fetching history data for ATM ID:', err);
+//                     res.status(500).json({ error: 'Error fetching history data' });
+//                 } else {
+//                     res.status(200).json({ data: result, totalCount });
+//                 }
+//             });
+//         }
+//     });
+// });
 
 
 
