@@ -36,6 +36,7 @@ import SignUp from './Pages/SignUp';
 import { getUserId, setUserSession ,removeUserSession } from './Utils/Common';
 import RecNotAvailable from './Pages/RecNotAvailable';
 import Logout from './Utils/Logout';
+import PanelHealth from './Pages/PanelHealth';
 
 
 function App() {
@@ -113,6 +114,7 @@ function App() {
         <Route path="TimeDifference" element={<TimeDifference />} />
         <Route path="RecNotAvailable" element={<RecNotAvailable />} />
         <Route path="Logout" element={<Logout />} />
+        <Route path="PanelHealth" element={<PanelHealth />} />
 
       </Route>
     </Routes>

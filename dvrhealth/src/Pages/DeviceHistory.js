@@ -24,17 +24,29 @@ const DeviceHistory = () => {
         const apiUrl = process.env.REACT_APP_DVRHEALTH_API_URL;
         const postPerPage = 100;
 
+        // const formattedStartDate = startDate
+        //     ? startDate.toISOString().slice(0, 19).replace('T', ' ')
+        //     : null;
+
+        // const formattedEndDate = endDate
+        //     ? new Date(endDate.getTime() + 24 * 60 * 60 * 1000)
+        //         .toISOString()
+        //         .slice(0, 19)
+        //         .replace('T', ' ')
+        //     : null;
+
         const formattedStartDate = startDate
-            ? startDate.toISOString().slice(0, 19).replace('T', ' ')
-            : null;
+        ? new Date(startDate).toISOString().slice(0, 19).replace('T', ' ')
+        : null;
+      
+      const formattedEndDate = endDate
+        ? new Date(endDate).toISOString().slice(0, 19).replace('T', ' ')
+        : null;
+      
 
-        const formattedEndDate = endDate
-            ? new Date(endDate.getTime() + 24 * 60 * 60 * 1000)
-                .toISOString()
-                .slice(0, 19)
-                .replace('T', ' ')
-            : null;
 
+        console.log(formattedStartDate)
+        console.log(formattedEndDate)
 
         let apiUrlWithEndpoint = `${apiUrl}/devicehistoryThree/${atmId}?page=${pageNumber}&recordsPerPage=${postPerPage}`;
 
@@ -101,36 +113,6 @@ const DeviceHistory = () => {
 
             {!loading && post.length > 0 && (
                 <div>
-                    {/* <div className="row">
-                        <div className="col-6 pt-3">
-                            <h6>Device History</h6>
-                        </div>
-                        <div className="col-6 d-flex justify-content-end">
-                            <div className='col-4 text-end login-form2'>
-                                <button onClick={exportToExcel} className="btn btn-primary mt-3">
-                                    Export to Excel
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div className='date'>
-                        <span style={{ color: 'red', fontWeight: '600', fontSize: '15px' }}>Select date Range :</span>
-                        <div className="date-picker-container">
-                            <DatePicker
-                                selected={startDate}
-                                onChange={(date) => setStartDate(date)}
-                                placeholderText="Start Date"
-                                className="custom-date-picker" // Add your custom class name
-                            />
-                            <DatePicker
-                                selected={endDate}
-                                onChange={(date) => setEndDate(date)}
-                                placeholderText="End Date"
-                                className="custom-date-picker" // Add your custom class name
-                            />
-                        </div>
-                    </div> */}
-
                     <div className="d-flex justify-content-between align-items-center">
                         <h6 style={{ color: '#0851a6', fontWeight: '600', fontSize: '15px' }}>Device History</h6>
 
@@ -141,13 +123,13 @@ const DeviceHistory = () => {
                                     selected={startDate}
                                     onChange={(date) => setStartDate(date)}
                                     placeholderText="Start Date"
-                                    className="custom-date-picker" 
+                                    className="custom-date-picker"
                                 />
                                 <DatePicker
                                     selected={endDate}
                                     onChange={(date) => setEndDate(date)}
                                     placeholderText="End Date"
-                                    className="custom-date-picker" 
+                                    className="custom-date-picker"
                                 />
                             </div>
                         </div>

@@ -59,6 +59,7 @@ const AgingMoreThan30 = () => {
             .then(response => {
                 if (response.data && response.data.length > 0) {
                     setPost(response.data);
+                    console.log(response.data)
                 }
             })
             .catch(error => {

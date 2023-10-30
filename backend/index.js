@@ -2,28 +2,25 @@ const express = require('express');
 const mysql = require('mysql');
 const cors = require('cors');
 const app = express();
-const xlsxPopulate = require('xlsx-populate');
-const path = require('path');
-const fs = require('fs');
-const moment = require('moment');
+// process.env.TZ = 'UTC';
 
 app.use(express.json());
 const port = 8000;
 
-const db = mysql.createConnection({
-    host: '192.168.100.24',
-    user: 'dvrhealth',
-    password: 'dvrhealth',
-    database: 'esurv'
-});
-
-
 // const db = mysql.createConnection({
-//     host: 'localhost',
-//     user: 'root',
-//     password: '',
-//     database: 'esurvfour'
+//     host: '192.168.100.24',
+//     user: 'dvrhealth',
+//     password: 'dvrhealth',
+//     database: 'esurv'
 // });
+
+
+const db = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'esurvfour'
+});
 
 db.connect((err) => {
     if (err) {
@@ -34,14 +31,14 @@ db.connect((err) => {
     }
 });
 
-app.use(cors({
-    origin: 'http://192.168.100.24:3000'
-}));
-
-
 // app.use(cors({
-//     origin: 'http://localhost:3000'
+//     origin: 'http://192.168.100.24:3000'
 // }));
+
+
+app.use(cors({
+    origin: 'http://localhost:3000'
+}));
 
 
 
@@ -1092,6 +1089,47 @@ app.get('/OnlineSiteDetails', (req, res) => {
     });
 });
 
+app.get('/PanelHealthDetails', (req, res) => {
+    const page = req.query.page || 1;
+    const recordsPerPage = 50;
+    const offset = (page - 1) * recordsPerPage;
+    const atmid = req.query.atmid || '';
+
+    let query = `SELECT * FROM panel_health`;
+
+    if (atmid) {
+        query += ` AND dh.atmid LIKE '%${atmid}%'`;
+    }
+
+    query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
+
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error fetching DVR health data:', err);
+            res.status(500).json({ error: 'Error fetching DVR health data' });
+        } else {
+            if (!atmid) {
+                const totalCountQuery = `SELECT COUNT(*) AS panel_count FROM panel_health`;
+                db.query(totalCountQuery, (err, countResult) => {
+                    if (err) {
+                        console.error('Error fetching total count of records:', err);
+                        res.status(500).json({ error: 'Error fetching total count of records' });
+                    } else {
+                        res.status(200).json({ data: result, totalCount: countResult[0].panel_count });
+                    }
+                });
+            } else {
+                res.status(200).json({ data: result });
+            }
+        }
+    });
+});
+
+
+
+
+
+
 
 app.get('/devicehistoryThree/:atmId', (req, res) => {
     const atmId = req.params.atmId;
@@ -1127,12 +1165,15 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
         query += ` AND last_communication >= ? AND last_communication <= ?`;
     }
 
-   
-    query += ` ORDER BY last_communication DESC`;
+    query += ` ORDER BY last_communication ASC`;
 
-    const totalCountQuery = `SELECT COUNT(*) AS totalCount FROM dvr_history WHERE atmid = ?`;
+    const totalCountQuery = `
+    SELECT COUNT(*) AS totalCount
+    FROM dvr_history
+    WHERE atmid = ?
+      `;
 
-    db.query(totalCountQuery, [atmId], (err, countResult) => {
+    db.query(totalCountQuery, [atmId, startDate, endDate], (err, countResult) => {
         if (err) {
             console.error('Error fetching total count of records:', err);
             res.status(500).json({ error: 'Error fetching total count of records' });
@@ -1154,69 +1195,6 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
         }
     });
 });
-
-
-
-
-// app.get('/devicehistoryThree/:atmId', (req, res) => {
-//     const atmId = req.params.atmId;
-//     const page = req.query.page || 1;
-//     const recordsPerPage = 100;
-//     const startDate = req.query.startDate;
-//     const endDate = req.query.endDate;
-
-//     console.log('Received startDate:', startDate);
-//     console.log('Received endDate:', endDate);
-
-//     let query = `
-//     SELECT 
-//         *,
-//         CASE 
-//             WHEN hdd = 'ok' THEN 'working'
-//             ELSE 'not working'
-//         END AS hdd_status,
-//         CASE 
-//             WHEN login_status = 0 THEN 'working'
-//             ELSE 'not working'
-//         END AS login_status,
-//         DATE_FORMAT(last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
-//         DATE_FORMAT(recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
-//         DATE_FORMAT(recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
-//         DATE_FORMAT(cdate, '%Y-%m-%d %H:%i:%s') AS cdate
-//     FROM 
-//         dvr_history 
-//     WHERE 
-//         atmid = ?`;
-
-    
-//         if (startDate && endDate) {
-//             query += ` AND last_communication >= ? AND last_communication <= ?`;
-//         }
-
-//     const totalCountQuery = `SELECT COUNT(*) AS totalCount FROM dvr_history WHERE atmid = ?`;
-
-//     db.query(totalCountQuery, [atmId], (err, countResult) => {
-//         if (err) {
-//             console.error('Error fetching total count of records:', err);
-//             res.status(500).json({ error: 'Error fetching total count of records' });
-//         } else {
-//             const totalCount = countResult[0].totalCount;
-
-//             const offset = (page - 1) * recordsPerPage;
-
-//             query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
-
-//             db.query(query, [atmId, startDate, endDate], (err, result) => {
-//                 if (err) {
-//                     console.error('Error fetching history data for ATM ID:', err);
-//                     res.status(500).json({ error: 'Error fetching history data' });
-//                 } else {
-//                     res.status(200).json({ data: result, totalCount });
-//                 }
-//             });
-//         }
-//     });
-// });
 
 
 
@@ -1296,41 +1274,38 @@ app.get('/AllSites', (req, res) => {
 });
 
 app.get('/ExportAllSites', (req, res) => {
-    const atmid = req.query.atmid || '';
+    // const atmid = req.query.atmid || '';
 
     let query = `
     SELECT
+    dh.atmid,
     dh.ip,
-    dh.cam1,
-    dh.cam2,
-    dh.cam3,
-    dh.cam4,
-    dh.latency,
-    CASE
-        WHEN dh.hdd = 'ok' THEN 'working'
-        ELSE 'not working'
-    END AS hdd_status,
     CASE
         WHEN dh.login_status = 0 THEN 'working'
         ELSE 'not working'
     END AS login_status,
-    dh.atmid,
-    dh.dvrtype,
-  
-    DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
-    DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
-    DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
-    DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
-  
     s.City,
     s.State,
-    s.Zone
+    s.Zone,
+    DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+    dh.cam1,
+    dh.cam2,
+    dh.cam3,
+    dh.cam4,
+    CASE
+        WHEN dh.hdd = 'ok' THEN 'working'
+        ELSE 'not working'
+    END AS hdd_status,
+    dh.dvrtype,
+    DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
+    DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to
 FROM
     dvr_health dh
 JOIN
     sites s
 ON
-    dh.atmid = s.ATMID`;
+    dh.atmid = s.ATMID;
+`;
 
     // if (atmid) {
     //     query += ` WHERE LOWER(dh.atmid) LIKE '%${atmid.toLowerCase()}%'`;
@@ -1353,22 +1328,24 @@ app.get('/ExportOnlineSites', (req, res) => {
     let query = `
     SELECT
     dh.atmid,
-    dh.login_status,
+    dh.ip AS routerip,
+    CASE
+        WHEN dh.login_status = 0 THEN 'working'
+        ELSE 'not working'
+    END AS login_status,
+    s.city,
+    s.state,
+    s.zone,
     DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
+    DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+    CASE WHEN dh.hdd = 'ok' THEN 'working' ELSE 'not working' END AS hdd_status,
     dh.cam1,
     dh.cam2,
     dh.cam3,
     dh.cam4,
     dh.dvrtype,
-    DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
     DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
-    DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
-    DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,          
-    dh.ip AS routerip,
-    CASE WHEN dh.hdd = 'ok' THEN 'working' ELSE 'not working' END AS hdd_status,
-    s.city,
-    s.state,
-    s.zone,
+    DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,          
     CONCAT(FLOOR(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()) / 60), ':', MOD(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()), 60)) AS time_difference_hours_minutes
 FROM
     dvr_health dh
@@ -1377,10 +1354,6 @@ JOIN
 WHERE
     dh.login_status = 0
     AND s.live = 'Y'`;
-
-    // if (atmid) {
-    //     query += ` AND dh.atmid LIKE '%${atmid}%'`;
-    // }
 
     db.query(query, (err, result) => {
         if (err) {
