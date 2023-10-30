@@ -7,20 +7,20 @@ const app = express();
 app.use(express.json());
 const port = 8000;
 
-// const db = mysql.createConnection({
-//     host: '192.168.100.24',
-//     user: 'dvrhealth',
-//     password: 'dvrhealth',
-//     database: 'esurv'
-// });
-
-
 const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'esurvfour'
+    host: '192.168.100.24',
+    user: 'dvrhealth',
+    password: 'dvrhealth',
+    database: 'esurv'
 });
+
+
+// const db = mysql.createConnection({
+//     host: 'localhost',
+//     user: 'root',
+//     password: '',
+//     database: 'esurvfour'
+// });
 
 db.connect((err) => {
     if (err) {
@@ -31,14 +31,14 @@ db.connect((err) => {
     }
 });
 
-// app.use(cors({
-//     origin: 'http://192.168.100.24:3000'
-// }));
-
-
 app.use(cors({
-    origin: 'http://localhost:3000'
+    origin: 'http://192.168.100.24:3000'
 }));
+
+
+// app.use(cors({
+//     origin: 'http://localhost:3000'
+// }));
 
 
 
