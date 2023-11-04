@@ -130,7 +130,6 @@ const Home = () => {
                     <p class="mb-0 text-secondary">Never On</p>
                     <Link to='/admin/NeverOn' style={{ textDecoration: 'none' }}><h4 class="my-1 neveronsi">{neveron}</h4>
                     </Link>
-
                   </div>
                   <div class="widgets-icons-2 rounded-circle bg-gradient-blooker2 text-white ms-auto"><CgDanger />
                   </div>
@@ -143,8 +142,7 @@ const Home = () => {
                   <div>
                     <p class="mb-0 text-secondary">HDD</p>
                     <Link to='/admin/HddNotWorking' style={{ textDecoration: 'none' }}>   <h4 class="my-1 hddsi">{hddNotWorking}</h4></Link>
-                    <Link to='/admin/FormattedData' style={{ textDecoration: 'none' }}>  <p style={{color: 'red', fontWeight: 'bold'}} className='mt-2'>See Formatted Data</p></Link>
-                   
+                    <Link to='/admin/FormattedData' style={{ textDecoration: 'none' }}>  <p style={{ color: 'red', fontWeight: 'bold' }} className='mt-2'>See Formatted Data</p></Link>
                   </div>
                   <div class="widgets-icons-2 rounded-circle bg-gradient-blooker3 text-white ms-auto"><BiDisc />
                   </div>

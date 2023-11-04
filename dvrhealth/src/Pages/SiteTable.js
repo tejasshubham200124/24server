@@ -1,4 +1,4 @@
-import React, { useState, useEffect,Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Table } from 'react-bootstrap';
 import ReactPaginate from 'react-paginate';
 import axios from 'axios';
@@ -6,7 +6,7 @@ import * as XLSX from 'xlsx';
 import TableRow from './TableRow';
 
 
-const SiteTable = () => {
+const SiteTable= () => {
     const [post, setPost] = useState([]);
     const [number, setNumber] = useState(1);
     const [postPerPage] = useState(50);
@@ -26,7 +26,7 @@ const SiteTable = () => {
     const fetchAllSitesData = (page) => {
         setLoading(true);
 
-        let apiUrl = `${process.env.REACT_APP_DVRHEALTH_API_URL}/AllSites?page=${page}`;
+        let apiUrl = `${process.env.REACT_APP_DVRHEALTH_API_URL}/AllSitesTwodemo?page=${page}`;
 
         if (searchTerm) {
             apiUrl += `&atmid=${searchTerm}`;
@@ -95,8 +95,10 @@ const SiteTable = () => {
         <div>
             {loading && (
                 <div className="loader-container">
-                    <div className="loader"></div>
+                    <div className="loader">
+                    </div>
                 </div>
+
             )}
 
             {!loading && post.length > 0 && (
@@ -127,9 +129,9 @@ const SiteTable = () => {
                             </div>
                         </div>
                     </div>
-                    <Table striped bordered hover className='custom-table mt-4'>
-                        
-                        <thead>
+                    <div style={{ overflowY: 'auto', scrollbarWidth: 'thin' }}>
+                        <Table  className='custom-tablepanel mt-4'>
+                            <thead>
                                 <tr>
                                     <th>Sr No</th>
                                     <th>ATM ID</th>
@@ -144,14 +146,18 @@ const SiteTable = () => {
                                     <th>Last Communication</th>
                                     <th>Router Ip</th>
                                     <th>Dvr type</th>
+                                    <th>HTTP Port</th>
+                                    <th>RTSP Port</th>
+                                    <th>SDK Port</th>
+                                    <th>Router Port</th>
+                                    <th>AI Port</th>
                                     <th>Camera Status</th>
                                     <th>Rec From</th>
                                     <th>Rec To</th>
                                 </tr>
                             </thead>
-                        
-                        <tbody>
-                        {post.length > 0 ? (
+                            <tbody>
+                                {post.length > 0 ? (
                                     post.map((user, index) => (
                                         <Suspense fallback={<Fallback />} key={index}>
                                             <TableRow users={user} index={index} />
@@ -161,18 +167,19 @@ const SiteTable = () => {
                                         <td colSpan='12'>No data available.</td>
                                     </tr>
                                 )}
-                        </tbody>
-                    </Table>
-                    <ReactPaginate
-                        previousLabel={'<'}
-                        nextLabel={'>'}
-                        pageCount={Math.ceil(totalCount / postPerPage)}
-                        onPageChange={handlePageClick}
-                        containerClassName={'paginationBttns'}
-                        activeClassName={'paginationActive'}
-                        disableInitialCallback={true}
-                        initialPage={number - 1}
-                    />
+                            </tbody>
+                        </Table>
+                        <ReactPaginate
+                            previousLabel={'<'}
+                            nextLabel={'>'}
+                            pageCount={Math.ceil(totalCount / postPerPage)}
+                            onPageChange={handlePageClick}
+                            containerClassName={'paginationBttns'}
+                            activeClassName={'paginationActive'}
+                            disableInitialCallback={true}
+                            initialPage={number - 1}
+                        />
+                    </div>
                 </div>
             )}
         </div>

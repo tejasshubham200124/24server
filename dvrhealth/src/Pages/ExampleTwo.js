@@ -1,254 +1,185 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Table } from 'react-bootstrap';
 import ReactPaginate from 'react-paginate';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
-import { FiArrowUp, FiArrowDown } from 'react-icons/fi';
-import { useParams } from 'react-router-dom';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+import TableRow from './TableRow';
 
 
 const ExampleTwo = () => {
     const [post, setPost] = useState([]);
     const [number, setNumber] = useState(1);
-    const [postPerPage] = useState(100);
+    const [postPerPage] = useState(50);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [searchTermEntered, setSearchTermEntered] = useState('');
+    const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [totalCount, setTotalCount] = useState(0);
-    const { atmId } = useParams();
-    const [startDate, setStartDate] = useState(null);
-    const [endDate, setEndDate] = useState(null);
 
-    const fetchData = (pageNumber, atmId, startDate, endDate) => {
+    const firstPost = (number - 1) * postPerPage;
+    const lastPost = Math.min(firstPost + postPerPage, totalCount);
+
+    useEffect(() => {
+        fetchAllSitesData(number, searchTermEntered);
+    }, [number, searchTermEntered]);
+
+    const fetchAllSitesData = (page) => {
         setLoading(true);
-        const apiUrl = process.env.REACT_APP_DVRHEALTH_API_URL;
-        const postPerPage = 100;
 
-        const formattedStartDate = startDate
-            ? startDate.toISOString().slice(0, 19).replace('T', ' ')
-            : null;
+        let apiUrl = `${process.env.REACT_APP_DVRHEALTH_API_URL}/AllSitesTwodemotwo?page=${page}`;
 
-        const formattedEndDate = endDate
-            ? new Date(endDate.getTime() + 24 * 60 * 60 * 1000)
-                .toISOString()
-                .slice(0, 19)
-                .replace('T', ' ')
-            : null;
-
-
-        let apiUrlWithEndpoint = `${apiUrl}/devicehistoryThree/${atmId}?page=${pageNumber}&recordsPerPage=${postPerPage}`;
-
-        if (formattedStartDate && formattedEndDate) {
-            apiUrlWithEndpoint += `&startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+        if (searchTerm) {
+            apiUrl += `&atmid=${searchTerm}`;
         }
 
         axios
-            .get(apiUrlWithEndpoint)
+            .get(apiUrl)
             .then((response) => {
-                if (response.data && response.data.data) {
-                    setPost(response.data.data);
-                    setTotalCount(response.data.totalCount);
-                    setLoading(false);
-                } else {
-                    console.log('No data received from API.');
-                }
+                console.log('API Response for Page', page, ':', response.data);
+                const responseData = response.data.data || [];
+                setPost(responseData);
+                setTotalCount(response.data.totalCount || 0);
             })
             .catch((error) => {
-                console.error('Error fetching data:', error);
+                console.error('API Error:', error);
+            })
+            .finally(() => {
                 setLoading(false);
             });
     };
 
-
     useEffect(() => {
-        fetchData(number, atmId, startDate, endDate);
-    }, [atmId, number, startDate, endDate]);
+        const handleBackspace = (e) => {
+            if (e.key === 'Backspace' && searchTerm === '') {
+                fetchAllSitesData(number, '');
+            }
+        };
+        window.addEventListener('keydown', handleBackspace);
+        return () => {
+            window.removeEventListener('keydown', handleBackspace);
+        };
+    }, [searchTerm]);
 
     const handlePageClick = (selected) => {
         const newPageNumber = selected.selected + 1;
         setNumber(newPageNumber);
-        fetchData(newPageNumber, startDate, endDate);
+        fetchAllSitesData(newPageNumber, searchTerm);
     };
 
 
-    const exportToExcel = async () => {
-        try {
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/ExportAllSites`);
+                setData(response.data.data);
+            } catch (error) {
+                console.error('Error fetching data from API:', error);
+            }
+            setLoading(false);
+        };
 
-            const response = await axios.get`${process.env.REACT_APP_DVRHEALTH_API_URL}/DeviceHistoryExport`;
-            const data = response.data.data;
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-            const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-            const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            const dataUrl = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = dataUrl;
-            link.download = 'DeviceHistory.xlsx';
-            link.click();
-        } catch (error) {
-            console.error('Error exporting to Excel:', error);
-        }
-    }
+        fetchData();
+    }, []);
+
+    const exportToExcel = () => {
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
+        XLSX.writeFile(wb, 'Online_Sites.xlsx');
+    };
+
+    const Fallback = () => <tr><td>Loading....</td></tr>;
 
     return (
         <div>
             {loading && (
                 <div className="loader-container">
-                    <div className="loader"></div>
+                    <div className="loader">
+                    </div>
                 </div>
+
             )}
 
             {!loading && post.length > 0 && (
                 <div>
-                    {/* <div className="row">
-                        <div className="col-6 pt-3">
-                            <h6>Device History</h6>
+                    <div className="row">
+                        <div className="col-6 pt-2">
+                            <h6>Site Table</h6>
+                            <button onClick={exportToExcel} className="btn btn-primary mt-3">
+                                Export to Excel
+                            </button>
+
                         </div>
                         <div className="col-6 d-flex justify-content-end">
                             <div className='col-4 text-end login-form2'>
-                                <button onClick={exportToExcel} className="btn btn-primary mt-3">
-                                    Export to Excel
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div className='date'>
-                        <span style={{ color: 'red', fontWeight: '600', fontSize: '15px' }}>Select date Range :</span>
-                        <div className="date-picker-container">
-                            <DatePicker
-                                selected={startDate}
-                                onChange={(date) => setStartDate(date)}
-                                placeholderText="Start Date"
-                                className="custom-date-picker" // Add your custom class name
-                            />
-                            <DatePicker
-                                selected={endDate}
-                                onChange={(date) => setEndDate(date)}
-                                placeholderText="End Date"
-                                className="custom-date-picker" // Add your custom class name
-                            />
-                        </div>
-                    </div> */}
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onKeyUp={(e) => {
+                                        if (e.key === 'Enter') {
+                                            fetchAllSitesData(number, e.target.value);
+                                        }
+                                    }}
+                                    placeholder='search atmid'
+                                    className='form-control'
 
-                    <div className="d-flex justify-content-between align-items-center">
-                        <h6 style={{ color: '#0851a6', fontWeight: '600', fontSize: '15px' }}>Device History</h6>
-
-                        <div className='date'>
-                            <span style={{ color: '#0851a6', fontWeight: '600', fontSize: '15px' }}>Select Date Range :</span>
-                            <div className="date-picker-container">
-                                <DatePicker
-                                    selected={startDate}
-                                    onChange={(date) => setStartDate(date)}
-                                    placeholderText="Start Date"
-                                    className="custom-date-picker" 
-                                />
-                                <DatePicker
-                                    selected={endDate}
-                                    onChange={(date) => setEndDate(date)}
-                                    placeholderText="End Date"
-                                    className="custom-date-picker" 
                                 />
                             </div>
                         </div>
-                        <button onClick={exportToExcel} className="btn btn-primary ">
-                            Export to Excel
-                        </button>
-
                     </div>
-
-                    <Table striped bordered hover className="custom-table mt-4">
-                        <thead>
-                            <tr>
-                                <th>Sr No</th>
-                                <th>ATM ID</th>
-                                <th>Up/Down</th>
-                                <th>Device Time</th>
-                                <th>HDD Status</th>
-                                <th>Last Communication</th>
-                                <th>Router Ip</th>
-                                <th>Camera Status</th>
-                                <th>Rec From</th>
-                                <th>Rec To</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {post.map((item, index) => (
-                                <tr key={index}>
-                                    <td>{index + 1}</td>
-                                    <td style={{ color: 'darkblue', fontWeight: 'bold', fontSize: '15px' }}>{item.atmid}</td>
-                                    <td>
-                                        {item.login_status === "working" ? (
-                                            <FiArrowUp style={{ color: 'green', fontSize: '20px' }} />
-                                        ) : (
-                                            <FiArrowDown style={{ color: 'red', fontSize: '20px' }} />
-                                        )}
-                                    </td>
-                                    <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{item.cdate}</td>
-
-
-                                    <td style={{ color: item.hdd_status === 'working' ? 'green' : 'red', fontWeight: 'bold', fontSize: '15px' }}>
-                                        {item.hdd_status}
-                                    </td>
-                                    <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{item.last_communication}</td>
-                                    <td style={{ color: 'skyblue', fontWeight: 'bold', fontSize: '13px' }}>{item.ip}</td>
-                                    <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                            <div
-                                                style={{
-                                                    width: '15px',
-                                                    height: '15px',
-                                                    borderRadius: '20px',
-                                                    backgroundColor: item.cam1 === 'working' ? 'green' : 'red',
-                                                    marginRight: '5px',
-                                                    paddingTop: '3px',
-                                                }}
-                                            ></div>
-                                            <div
-                                                style={{
-                                                    width: '15px',
-                                                    height: '15px',
-                                                    borderRadius: '20px',
-                                                    backgroundColor: item.cam2 === 'working' ? 'green' : 'red',
-                                                    marginRight: '5px',
-                                                }}
-                                            ></div>
-
-                                            <div
-                                                style={{
-                                                    width: '15px',
-                                                    height: '15px',
-                                                    borderRadius: '20px',
-                                                    backgroundColor: item.cam3 === 'working' ? 'green' : 'red',
-                                                    marginRight: '5px',
-                                                }}
-                                            ></div>
-                                            <div
-                                                style={{
-                                                    width: '15px',
-                                                    height: '15px',
-                                                    borderRadius: '20px',
-                                                    backgroundColor: item.cam4 === 'working' ? 'green' : 'red',
-                                                }}
-                                            ></div>
-                                        </div>
-                                    </td>
-                                    <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{item.recording_from}</td>
-                                    <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{item.recording_to}</td>
+                    <div style={{ overflowY: 'auto', scrollbarWidth: 'thin' }}>
+                        <Table  className='custom-tablepanel mt-4'>
+                            <thead>
+                                <tr>
+                                    <th>Sr No</th>
+                                    <th>ATM ID</th>
+                                    <th>
+                                        Up/Down
+                                    </th>
+                                    <th>Device Time</th>
+                                    <th>City</th>
+                                    <th>State</th>
+                                    <th>Zone</th>
+                                    <th>HDD Status</th>
+                                    <th>Last Communication</th>
+                                    <th>Router Ip</th>
+                                    <th>Dvr type</th>
+                                    <th>HTTP</th>
+                                    <th>RTSP</th>
+                                    <th>SDK</th>
+                                    <th>Router Port</th>
+                                    <th>AI Port</th>
+                                    <th>Camera Status</th>
+                                    <th>Rec From</th>
+                                    <th>Rec To</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </Table>
-                    <ReactPaginate
-                        previousLabel={'<'}
-                        nextLabel={'>'}
-                        pageCount={Math.ceil(totalCount / postPerPage)}
-                        onPageChange={handlePageClick}
-                        containerClassName={'paginationBttns'}
-                        activeClassName={'paginationActive'}
-                        disableInitialCallback={true}
-                        initialPage={number - 1}
-                    />
+                            </thead>
+                            <tbody>
+                                {post.length > 0 ? (
+                                    post.map((user, index) => (
+                                        <Suspense fallback={<Fallback />} key={index}>
+                                            <TableRow users={user} index={index} />
+                                        </Suspense>))
+                                ) : (
+                                    <tr>
+                                        <td colSpan='12'>No data available.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </Table>
+                        <ReactPaginate
+                            previousLabel={'<'}
+                            nextLabel={'>'}
+                            pageCount={Math.ceil(totalCount / postPerPage)}
+                            onPageChange={handlePageClick}
+                            containerClassName={'paginationBttns'}
+                            activeClassName={'paginationActive'}
+                            disableInitialCallback={true}
+                            initialPage={number - 1}
+                        />
+                    </div>
                 </div>
             )}
         </div>

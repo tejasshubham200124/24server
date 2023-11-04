@@ -10,6 +10,24 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 
 const DeviceHistory = () => {
+
+
+    function formatDate(inputDate) {
+        // Parse the input date string
+        const dateObj = new Date(inputDate);
+      
+        // Extract year, month, and day components
+        const year = dateObj.getFullYear();
+        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const day = String(dateObj.getDate()).padStart(2, '0');
+      
+        // Format the date in the desired format
+        const formattedDate = `${year}-${month}-${day}`;
+      
+        return formattedDate;
+      }
+      
+      
     const [post, setPost] = useState([]);
     const [number, setNumber] = useState(1);
     const [postPerPage] = useState(100);
@@ -35,23 +53,29 @@ const DeviceHistory = () => {
         //         .replace('T', ' ')
         //     : null;
 
-        const formattedStartDate = startDate
-        ? new Date(startDate).toISOString().slice(0, 19).replace('T', ' ')
-        : null;
+    //     const formattedStartDate = startDate
+    //     ? new Date(startDate).toISOString().slice(0, 19).replace('T', ' ')
+    //     : null;
       
-      const formattedEndDate = endDate
-        ? new Date(endDate).toISOString().slice(0, 19).replace('T', ' ')
-        : null;
+    //   const formattedEndDate = endDate
+    //     ? new Date(endDate).toISOString().slice(0, 19).replace('T', ' ')
+    //     : null;
       
 
+    console.log(
+    formatDate(startDate)
+    ) 
+    console.log(
+        formatDate(endDate)
 
-        console.log(formattedStartDate)
-        console.log(formattedEndDate)
+    )
+      
+
 
         let apiUrlWithEndpoint = `${apiUrl}/devicehistoryThree/${atmId}?page=${pageNumber}&recordsPerPage=${postPerPage}`;
 
-        if (formattedStartDate && formattedEndDate) {
-            apiUrlWithEndpoint += `&startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+        if (startDate && endDate) {
+            apiUrlWithEndpoint += `&startDate=${startDate}&endDate=${endDate}`;
         }
 
         axios
@@ -59,6 +83,8 @@ const DeviceHistory = () => {
             .then((response) => {
                 if (response.data && response.data.data) {
                     setPost(response.data.data);
+                    console.log(response)
+                    console.log(response.data.data)
                     setTotalCount(response.data.totalCount);
                     setLoading(false);
                 } else {

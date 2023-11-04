@@ -2,16 +2,25 @@ import React from 'react';
 import { Outlet, useNavigate, Link } from 'react-router-dom';
 import { AiOutlineArrowRight } from 'react-icons/ai'
 import { FaArrowLeft } from 'react-icons/fa'
+import { VscHome } from 'react-icons/vsc'
 import { removeUserSession } from '../Utils/Common';
 import { Layout, theme } from 'antd';
+
 import swal from 'sweetalert'
 const { Header, Content, Footer } = Layout;
 
 
 const App = () => {
 
+
     const navigate = useNavigate();
 
+    const handleSelectChange = (event) => {
+        const selectedUrl = event.target.value;
+        if (selectedUrl) {
+            navigate(selectedUrl); 
+        }
+    };
 
     const handleLogout = () => {
         swal({
@@ -60,11 +69,40 @@ const App = () => {
 
                 <button className="button" onClick={handleGoBack}>
                     <div className="button-box">
-                        <span> 
-                            <FaArrowLeft size={16} style={{ color: 'black' , marginBottom:'3px'}} />
+                        <span>
+                            <FaArrowLeft size={16} style={{ color: 'black', marginBottom: '3px' }} className="icon" />
                         </span>
                     </div>
                 </button>
+
+                <button className="button">
+                    <div className="button-box">
+                        <span>
+                            <Link to="/admin">
+                                <VscHome size={20} style={{ color: 'black', marginBottom: '3px' }} className="icon" />
+                            </Link>
+                        </span>
+                    </div>
+                </button>
+
+                <div className='change'>
+                    <div className='select'>
+                        <select
+                            className="form-select form-select-sm"
+                            aria-label=".form-select-sm example"
+                            onChange={handleSelectChange}
+                        >
+                            <option value="" disabled>Select</option>
+                            <option value="/admin">Dvr Health</option>
+                            <option value="/admin/Comfort">Comfort Panel</option>
+                            <option value="/admin/PanelHealth">Panel Health</option>
+                        </select>
+                    </div>
+                </div>
+
+
+
+
 
                 <button className="Btn" onClick={handleLogout}>
                     <div className="sign">

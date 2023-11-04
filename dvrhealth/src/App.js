@@ -37,6 +37,7 @@ import { getUserId, setUserSession ,removeUserSession } from './Utils/Common';
 import RecNotAvailable from './Pages/RecNotAvailable';
 import Logout from './Utils/Logout';
 import PanelHealth from './Pages/PanelHealth';
+import Comfort from './Pages/Comfort';
 
 
 function App() {
@@ -97,7 +98,7 @@ function App() {
         <Route path="CameraFour" element={<CameraFour />} />
         <Route path="DeviceHistory/:atmId" element={<DeviceHistory />} />
         <Route path="Tables" element={<Tables />} />
-        <Route path="ExampleTwo/:atmId" element={<ExampleTwo />} />
+        <Route path="ExampleTwo" element={<ExampleTwo />} />
         <Route path="SiteTable" element={<SiteTable />} />
         <Route path="Hdd" element={<Hdd />} />
         <Route path="TableRow" element={<TableRow />} />
@@ -115,6 +116,7 @@ function App() {
         <Route path="RecNotAvailable" element={<RecNotAvailable />} />
         <Route path="Logout" element={<Logout />} />
         <Route path="PanelHealth" element={<PanelHealth />} />
+        <Route path="Comfort" element={<Comfort />} />
 
       </Route>
     </Routes>
