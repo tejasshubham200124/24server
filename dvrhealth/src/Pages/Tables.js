@@ -62,7 +62,7 @@ const Tables = () => {
                         padding: '16px',
                     }}
                 >
-                    <h6>Aging Sites more than a month</h6>
+                    <h6>Aging Sites more than 7 days</h6>
                     <h6><span className='clr'> ( {count} )</span> Total sites</h6>
                     <Table striped bordered hover className='custom-table mt-4'>
                         <thead>

@@ -72,7 +72,7 @@ const AgingMoreThan30 = () => {
         >
              <div className="row">
                 <div className="col-6 pt-3">
-                    <h6>Aging sites more than  <span style={{ color: 'red', fontWeight: 'bold', fontSize: '15px' }}>( 30 days )</span></h6>
+                    <h6>Aging sites more than  <span style={{ color: 'red', fontWeight: 'bold', fontSize: '15px' }}>( 7 days )</span></h6>
 
                 </div>
                 <div className="col-6 d-flex justify-content-end">

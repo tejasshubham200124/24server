@@ -2,10 +2,10 @@ import React from 'react';
 import { FiArrowUp, FiArrowDown } from 'react-icons/fi'
 import { Link } from 'react-router-dom';
 import { BsRouter } from 'react-icons/bs'
-import { MdOutlineHttp } from 'react-icons/md'
+import { LiaInternetExplorer } from 'react-icons/lia'
 import { TbSdk } from 'react-icons/tb'
 import { BiSolidVideoRecording } from 'react-icons/bi'
-import { BsDisplayport } from 'react-icons/bs'
+import { FaRaspberryPi } from 'react-icons/fa'
 const TableRow = ({ users, index }) => {
     return (
         <tr>
@@ -41,7 +41,7 @@ const TableRow = ({ users, index }) => {
             <td style={{ color: 'skyblue', fontWeight: 'bold', fontSize: '13px' }}>{users.ip}</td>
             <td style={{ color: 'orange', fontWeight: 600, fontSize: '13px' }}>{users.dvrtype}</td>
             <td style={{ fontWeight: 600, color: (users.http_port_status === 'Y' || users.http_port_status === 'O') ? 'green' : 'red' }}>
-                {users.http_port_status === 'Y' || users.http_port_status === 'O' ? <MdOutlineHttp size={25} color="green" /> : <MdOutlineHttp size={25} color="red" />}
+                {users.http_port_status === 'Y' || users.http_port_status === 'O' ? <LiaInternetExplorer size={22} color="green" /> : <LiaInternetExplorer size={22} color="red" />}
             </td>
             <td style={{ fontWeight: 700, color: (users.sdk_port_status === 'Y' || users.sdk_port_status === 'O') ? 'green' : 'red' }}>
                 {users.sdk_port_status === 'Y' || users.sdk_port_status === 'O' ? <BiSolidVideoRecording size={20} color="green" /> : <BiSolidVideoRecording size={20} color="red" />}
@@ -54,7 +54,7 @@ const TableRow = ({ users, index }) => {
             </td>
 
             <td style={{ fontWeight: 700, color: (users.ai_port_status === 'Y' || users.ai_port_status === 'O') ? 'green' : 'red', fontWeight: 600, fontSize: '13px' }}>
-                {users.ai_port_status === 'Y' || users.ai_port_status === 'O' ? <BsDisplayport size={20} color="green" /> : <BsDisplayport size={20} color="red" />}
+                {users.ai_port_status === 'Y' || users.ai_port_status === 'O' ? <FaRaspberryPi size={20} color="green" /> : <FaRaspberryPi size={20} color="red" />}
             </td>
 
             <td>

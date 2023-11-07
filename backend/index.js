@@ -1433,10 +1433,6 @@ app.get('/AllSitesTwodemo', (req, res) => {
     const page = req.query.page || 1;
     const offset = (page - 1) * recordsPerPage;
     const atmid = req.query.atmid || '';
-
-
-    console.log('Received search ATM ID:', atmid);
-
     let query = `
    SELECT
     dh.ip,
@@ -1498,13 +1494,11 @@ ON
     ps.site_sn = psnr.site_id
     AND latest_status.latest_rectime = psnr.rectime
  `;
-
     if (atmid) {
         query += ` WHERE LOWER(dh.atmid) LIKE '%${atmid.toLowerCase()}%'`;
     }
-
+    query += ` ORDER BY dh.atmid`;
     query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
-
     db.query(query, (err, result) => {
         if (err) {
             console.error('Error fetching DVR health data:', err);
@@ -1527,153 +1521,101 @@ ON
     });
 });
 
-// const cache = {
-//     get: (key, callback) => {
-//       client.get(key, callback);
-//     },
-//     set: (key, data, expiry, callback) => {
-//       client.setex(key, expiry, JSON.stringify(data), callback);
-//     },
-//   };
 
-// app.get('/AllSitesTwodemotwo', (req, res) => {
-//     const recordsPerPage = 50;
-//     const page = req.query.page || 1;
-//     const offset = (page - 1) * recordsPerPage;
-//     const atmid = req.query.atmid || '';
 
-//     console.log('Received search ATM ID:', atmid);
+app.get('/demo', (req, res) => {
+    const recordsPerPage = 50;
+    const page = req.query.page || 1;
+    const offset = (page - 1) * recordsPerPage;
+    const atmid = req.query.atmid || '';
+    let query = `
+   SELECT
+    dh.ip,
+    dh.cam1,
+    dh.cam2,
+    dh.cam3,
+    dh.cam4,
+    dh.latency,
+    CASE
+        WHEN dh.hdd = 'ok' THEN 'working'
+        ELSE 'not working'
+    END AS hdd_status,
+    CASE
+        WHEN dh.login_status = 0 THEN 'working'
+        ELSE 'not working'
+    END AS login_status,
+    dh.atmid,
+    dh.dvrtype,
+    DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+    DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
+    DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
+    DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
+    s.City,
+    s.State,
+    s.Zone,
+    // ps.rtsp_port,
+    // ps.sdk_port,
+    // ps.router_port,
+    // ps.http_port,
+    // ps.ai_port,
+    psnr.http_port AS http_port_status,
+    psnr.sdk_port AS sdk_port_status,
+    psnr.router_port AS router_port_status,
+    psnr.rtsp_port AS rtsp_port_status,
+    psnr.ai_port AS ai_port_status
+FROM
+    dvr_health dh
+JOIN
+    sites s
+ON
+    dh.atmid = s.ATMID
+LEFT JOIN
+    port_status ps
+ON
+    dh.atmid = ps.ATMID
+LEFT JOIN (
+    SELECT
+        site_id,
+        MAX(rectime) AS latest_rectime
+    FROM
+        port_status_network_report
+    GROUP BY
+        site_id
+) AS latest_status
+ON
+    ps.site_sn = latest_status.site_id
+LEFT JOIN port_status_network_report psnr
+ON
+    ps.site_sn = psnr.site_id
+    AND latest_status.latest_rectime = psnr.rectime
+ `;
+    if (atmid) {
+        query += ` WHERE LOWER(dh.atmid) LIKE '%${atmid.toLowerCase()}%'`;
+    }
+    query += ` ORDER BY dh.atmid`;
+    query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error fetching DVR health data:', err);
+            res.status(500).json({ error: 'Error fetching DVR health data' });
+        } else {
+            if (!atmid) {
+                const totalCountQuery = `SELECT COUNT(*) AS totalCount FROM dvr_health`;
+                db.query(totalCountQuery, (err, countResult) => {
+                    if (err) {
+                        console.error('Error fetching total count of records:', err);
+                        res.status(500).json({ error: 'Error fetching total count of records' });
+                    } else {
+                        res.status(200).json({ data: result, totalCount: countResult[0].totalCount });
+                    }
+                });
+            } else {
+                res.status(200).json({ data: result });
+            }
+        }
+    });
+});
 
-//     // Use caching to store and retrieve the query results
-//     const cacheKey = `AllSitesTwodemo_${atmid}_${page}`;
-//     cache.get(cacheKey, (err, data) => {
-//         if (err) {
-//             console.error(err);
-//             res.status(500).send('Server error');
-//         } else if (data) {
-//             // If the data is found in the cache, return it
-//             console.log('Cache hit');
-//             res.json(data);
-//         } else {
-//             // If the data is not found in the cache, execute the query
-//             console.log('Cache miss');
-
-//             // Use prepared statements to prevent SQL injection and improve performance
-//             const query = `
-//             SELECT
-//                 dh.ip,
-//                 dh.cam1,
-//                 dh.cam2,
-//                 dh.cam3,
-//                 dh.cam4,
-//                 dh.latency,
-//                 CASE
-//                     WHEN dh.hdd = 'ok' THEN 'working'
-//                     ELSE 'not working'
-//                 END AS hdd_status,
-//                 CASE
-//                     WHEN dh.login_status = 0 THEN 'working'
-//                     ELSE 'not working'
-//                 END AS login_status,
-//                 dh.atmid,
-//                 dh.dvrtype,
-//                 DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
-//                 DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
-//                 DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
-//                 DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
-//                 s.City,
-//                 s.State,
-//                 s.Zone,
-//                 ps.rtsp_port,
-//                 ps.sdk_port,
-//                 ps.router_port,
-//                 ps.http_port,
-//                 ps.ai_port,
-//                 psnr.http_port AS http_port_status,
-//                 psnr.sdk_port AS sdk_port_status,
-//                 psnr.router_port AS router_port_status,
-//                 psnr.rtsp_port AS rtsp_port_status,
-//                 psnr.ai_port AS ai_port_status
-//             FROM
-//                 dvr_health dh
-//             JOIN
-//                 sites s
-//             ON
-//                 dh.atmid = s.ATMID
-//             LEFT JOIN
-//                 port_status ps
-//             ON
-//                 dh.atmid = ps.ATMID
-//             LEFT JOIN (
-//                 SELECT
-//                     site_id,
-//                     MAX(rectime) AS latest_rectime
-//                 FROM
-//                     port_status_network_report
-//                 GROUP BY
-//                     site_id
-//             ) AS latest_status
-//             ON
-//                 ps.site_sn = latest_status.site_id
-//             LEFT JOIN port_status_network_report psnr
-//             ON
-//                 ps.site_sn = psnr.site_id
-//                 AND latest_status.latest_rectime = psnr.rectime
-//             `;
-
-//             // Use an array to store the query parameters
-//             const params = [];
-
-//             if (atmid) {
-//                 // Use a placeholder for the atmid parameter
-//                 query += ` WHERE LOWER(dh.atmid) LIKE ?`;
-//                 // Use the percent sign (%) as a wildcard to match any substring
-//                 params.push(`%${atmid.toLowerCase()}%`);
-//             }
-
-//             // Use placeholders for the limit and offset parameters
-//             query += ` LIMIT ? OFFSET ?`;
-//             params.push(recordsPerPage, offset);
-
-//             // Use the mysql2 module to create and execute the prepared statement
-//             db.query(query, params, (err, result) => {
-//                 if (err) {
-//                     console.error(err);
-//                     res.status(500).send('Server error');
-//                 } else {
-//                     // Use the count function to get the total number of records
-//                     const countQuery = `SELECT COUNT(*) AS total FROM (${query}) AS subquery`;
-//                     db.execute(countQuery, params, (err, countResult) => {
-//                         if (err) {
-//                             console.error(err);
-//                             res.status(500).send('Server error');
-//                         } else {
-//                             // Calculate the number of pages based on the records per page
-//                             const totalPages = Math.ceil(countResult[0].total / recordsPerPage);
-//                             // Create an object to store the query results and the pagination information
-//                             const data = {
-//                                 results: result,
-//                                 page: page,
-//                                 totalPages: totalPages,
-//                                 totalRecords: countResult[0].total
-//                             };
-//                             // Store the data in the cache with an expiration time of 10 minutes
-//                             cache.set(cacheKey, data, 600, (err) => {
-//                                 if (err) {
-//                                     console.error(err);
-//                                     res.status(500).send('Server error');
-//                                 } else {
-//                                     // Return the data to the user
-//                                     res.json(data);
-//                                 }
-//                             });
-//                         }
-//                     });
-//                 }
-//             });
-//         }
-//     });
-// });
 
 app.get('/ExportAllSites', (req, res) => {
     // const atmid = req.query.atmid || '';

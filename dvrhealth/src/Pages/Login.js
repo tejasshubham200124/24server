@@ -29,7 +29,7 @@ function App() {
       if (response.ok) {
         setSuccessMessage(data.message);
         setErrorMessage('');
-    
+
         setUserSession(
           data.id,
         );
@@ -104,8 +104,19 @@ function App() {
                   />
                 </div>
                 <div className='login-button' style={{ textAlign: 'center' }}>
-                  <button class="login-button2" onClick={handleLogin} >Submit</button>
+                  <button
+                    className="login-button2"
+                    onClick={handleLogin}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleLogin();
+                      }
+                    }}
+                  >
+                    Submit
+                  </button>
                 </div>
+
                 <div className='d-flex flex-row justify-content-center align-items-center pt-2'>
                   {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
                   {successMessage && <p style={{ color: 'green' }}>{successMessage}</p>}
