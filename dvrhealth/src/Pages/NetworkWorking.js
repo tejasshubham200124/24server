@@ -142,7 +142,7 @@ const NetworkWorking = () => {
                                 <tr>
                                     <td>{index + 1}</td>
                                     <td style={{ color: 'darkblue', fontWeight: 'bold', fontSize: '13px' }}>
-                                        {users.atmid}
+                                        {users.ATMID}
                                     </td>
                                     <td>{users.http_port}</td>
                                     <td>{users.router_port}</td>
