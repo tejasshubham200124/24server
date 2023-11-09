@@ -5,7 +5,7 @@ import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { FiArrowUp, FiArrowDown } from 'react-icons/fi'
 
-const ExampleTwo = () => {
+const NetworkTotalSites= () => {
     const [post, setPost] = useState([]);
     const [number, setNumber] = useState(1);
     const [postPerPage] = useState(50);
@@ -169,4 +169,4 @@ const ExampleTwo = () => {
     );
 };
 
-export default ExampleTwo;
+export default NetworkTotalSites;

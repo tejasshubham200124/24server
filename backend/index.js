@@ -258,6 +258,279 @@ app.get('/OfflineSites', (req, res) => {
     });
 });
 
+app.get('/NetworkReportTotalSites', (req, res) => {
+    const query = `
+    SELECT COUNT(DISTINCT site_id) AS distinct_atmid_count
+    FROM port_status_network_report;
+    
+    `;
+
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error counting offline entries:', err);
+            res.status(500).json({ error: 'Error counting offline entries' });
+        } else {
+            const { distinct_atmid_count } = result[0];
+
+            res.status(200).json({ distinct_atmid_count });
+        }
+    });
+});
+
+
+app.get('/NetworkReportWorkingCount', (req, res) => {
+    const query = `
+    SELECT COUNT(*) AS working_count_records
+    FROM (
+      SELECT psnr.site_id
+      FROM port_status_network_report psnr
+      JOIN port_status ps ON psnr.site_id = ps.site_sn
+      WHERE psnr.latency > 0
+        AND DATE(psnr.rectime) = CURRENT_DATE
+      GROUP BY psnr.site_id
+    ) AS subquery;
+    
+    
+    `;
+
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error counting offline entries:', err);
+            res.status(500).json({ error: 'Error counting offline entries' });
+        } else {
+            const { working_count_records } = result[0];
+
+            res.status(200).json({ working_count_records });
+        }
+    });
+});
+
+
+app.get('/NetworkReportNotWorkingCount', (req, res) => {
+    const query = `
+    SELECT COUNT(*) AS notworking_records
+FROM (
+    SELECT psnr.site_id
+    FROM port_status_network_report psnr
+    JOIN port_status ps ON psnr.site_id = ps.site_sn
+    WHERE psnr.latency = 0
+      AND psnr.rectime = (
+        SELECT MAX(rectime)
+        FROM port_status_network_report
+        WHERE site_id = psnr.site_id
+        AND latency = 0
+      )
+    GROUP BY psnr.site_id
+) AS subquery;
+
+    
+    
+    `;
+
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error counting offline entries:', err);
+            res.status(500).json({ error: 'Error counting offline entries' });
+        } else {
+            const { notworking_records } = result[0];
+
+            res.status(200).json({ notworking_records });
+        }
+    });
+});
+app.get('/networkreportworking', (req, res) => {
+    const recordsPerPage = 50;
+    const page = req.query.page || 1;
+    const offset = (page - 1) * recordsPerPage;
+    const atmid = req.query.atmid || '';
+
+    const query = `
+        SELECT
+            psnr.site_id,
+            psnr.http_port,
+            psnr.sdk_port,
+            psnr.ai_port,
+            psnr.router_port,
+            psnr.rtsp_port,
+            ps.ATMID
+        FROM port_status_network_report psnr
+        JOIN port_status ps ON psnr.site_id = ps.site_sn
+        WHERE psnr.latency > 0
+          AND DATE(psnr.rectime) = CURRENT_DATE
+        GROUP BY psnr.site_id
+        ORDER BY psnr.site_id ASC
+        LIMIT ${recordsPerPage} OFFSET ${offset};
+    `;
+
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error fetching network report data:', err);
+            res.status(500).json({ error: 'Error fetching network report data' });
+        } else {
+            if (!atmid) {
+                const totalCountQuery = `
+                    SELECT COUNT(DISTINCT psnr.site_id) AS totalCount
+                    FROM port_status_network_report psnr
+                    JOIN port_status ps ON psnr.site_id = ps.site_sn
+                    WHERE psnr.latency > 0
+                      AND DATE(psnr.rectime) = CURRENT_DATE;
+                `;
+                db.query(totalCountQuery, (err, countResult) => {
+                    if (err) {
+                        console.error('Error fetching total count of records:', err);
+                        res.status(500).json({ error: 'Error fetching total count of records' });
+                    } else {
+                        res.status(200).json({ data: result, totalCount: countResult[0].totalCount });
+                    }
+                });
+            } else {
+                res.status(200).json({ data: result });
+            }
+        }
+    });
+});
+
+
+
+app.get('/networkreportnotworking', (req, res) => {
+    const recordsPerPage = 50;
+    const page = req.query.page || 1;
+    const offset = (page - 1) * recordsPerPage;
+    const atmid = req.query.atmid || '';
+
+    const query = `
+        SELECT
+            psnr.site_id,
+            psnr.http_port,
+            psnr.sdk_port,
+            psnr.ai_port,
+            psnr.router_port,
+            psnr.rtsp_port,
+            ps.ATMID
+        FROM port_status_network_report psnr
+        JOIN port_status ps ON psnr.site_id = ps.site_sn
+        WHERE psnr.latency = 0
+          AND psnr.rectime = (
+            SELECT MAX(rectime)
+            FROM port_status_network_report
+            WHERE site_id = psnr.site_id
+            AND latency = 0
+          )
+        GROUP BY psnr.site_id
+        ORDER BY psnr.site_id ASC
+        LIMIT ${recordsPerPage} OFFSET ${offset};
+    `;
+
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error fetching network report data:', err);
+            res.status(500).json({ error: 'Error fetching network report data' });
+        } else {
+            if (!atmid) {
+                const totalCountQuery = `
+                    SELECT COUNT(DISTINCT psnr.site_id) AS totalCount
+                    FROM port_status_network_report psnr
+                    JOIN port_status ps ON psnr.site_id = ps.site_sn
+                    WHERE psnr.latency = 0
+                      AND psnr.rectime = (
+                        SELECT MAX(rectime)
+                        FROM port_status_network_report
+                        WHERE site_id = psnr.site_id
+                        AND latency = 0
+                      );
+                `;
+                db.query(totalCountQuery, (err, countResult) => {
+                    if (err) {
+                        console.error('Error fetching total count of records:', err);
+                        res.status(500).json({ error: 'Error fetching total count of records' });
+                    } else {
+                        res.status(200).json({ data: result, totalCount: countResult[0].totalCount });
+                    }
+                });
+            } else {
+                res.status(200).json({ data: result });
+            }
+        }
+    });
+});
+
+
+
+app.get('/networkreport', (req, res) => {
+    const query = `
+    SELECT
+    psnr.site_id,
+    psnr.http_port,
+    psnr.sdk_port,
+    psnr.ai_port,
+    psnr.router_port,
+    psnr.rtsp_port,
+    ps.atmid
+FROM port_status_network_report psnr
+JOIN (
+    SELECT site_id, MAX(rectime) AS latest_rectime
+    FROM port_status_network_report
+    GROUP BY site_id
+) AS latest_status
+ON psnr.site_id = latest_status.site_id AND psnr.rectime = latest_status.latest_rectime
+JOIN port_status ps ON psnr.site_id = ps.site_sn
+    `;
+
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error fetching DVR health data:', err);
+            res.status(500).json({ error: 'Error fetching DVR health data' });
+        } else {
+            res.status(200).json(result);
+        }
+    });
+});
+
+
+app.get('/networkreporttwo', (req, res) => {
+    const recordsPerPage = 50;
+    const page = req.query.page || 1;
+    const offset = (page - 1) * recordsPerPage;
+
+    const query = `
+        SELECT
+            psnr.site_id,
+            psnr.http_port,
+            psnr.sdk_port,
+            psnr.ai_port,
+            psnr.router_port,
+            psnr.rtsp_port,
+            ps.atmid
+        FROM port_status_network_report psnr
+        JOIN (
+            SELECT site_id, MAX(rectime) AS latest_rectime
+            FROM port_status_network_report
+            GROUP BY site_id
+        ) AS latest_status
+        ON psnr.site_id = latest_status.site_id AND psnr.rectime = latest_status.latest_rectime
+        JOIN port_status ps ON psnr.site_id = ps.site_sn
+        LIMIT ${recordsPerPage} OFFSET ${offset};
+    `;
+
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error fetching network report data:', err);
+            res.status(500).json({ error: 'Error fetching network report data' });
+        } else {
+            const totalCountQuery = `SELECT COUNT(DISTINCT site_id) AS totalCount FROM port_status_network_report`;
+            db.query(totalCountQuery, (err, countResult) => {
+                if (err) {
+                    console.error('Error fetching total count of records:', err);
+                    res.status(500).json({ error: 'Error fetching total count of records' });
+                } else {
+                    res.status(200).json({ data: result, totalCount: countResult[0].totalCount });
+                }
+            });
+        }
+    });
+});
+
+
 
 app.get('/hddnotworking', (req, res) => {
     const query = `
@@ -1093,68 +1366,57 @@ app.get('/OnlineSiteDetails', (req, res) => {
     });
 });
 
-app.get('/PanelHealthDetails', (req, res) => {
-    const page = req.query.page || 1;
-    const recordsPerPage = 50;
-    const offset = (page - 1) * recordsPerPage;
-    const atmid = req.query.atmid || '';
 
-    let query = `SELECT * FROM panel_health`;
+// app.get('/PanelHealthDetailsapid', (req, res) => {
+//     const page = req.query.page || 1;
+//     const recordsPerPage = 50;
+//     const offset = (page - 1) * recordsPerPage;
+//     const atmid = req.query.atmid || '';
 
-    if (atmid) {
-        query += ` AND dh.atmid LIKE '%${atmid}%'`;
-    }
+//     const apiUrl = 'http://103.141.218.26:8080/Hitachi/api/panel_health_data_report_ajax_api.php';
 
-    query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
+//     axios.get(apiUrl)
+//         .then(response => {
+//             const responseData = response.data[0];
 
-    db.query(query, (err, result) => {
-        if (err) {
-            console.error('Error fetching DVR health data:', err);
-            res.status(500).json({ error: 'Error fetching DVR health data' });
-        } else {
-            if (!atmid) {
-                const totalCountQuery = `SELECT COUNT(*) AS panel_count FROM panel_health`;
-                db.query(totalCountQuery, (err, countResult) => {
-                    if (err) {
-                        console.error('Error fetching total count of records:', err);
-                        res.status(500).json({ error: 'Error fetching total count of records' });
-                    } else {
-                        res.status(200).json({ data: result, totalCount: countResult[0].panel_count });
-                    }
-                });
-            } else {
-                res.status(200).json({ data: result });
-            }
-        }
-    });
-});
-app.get('/panelHealthtwo', async (req, res) => {
-    try {
+//             if (responseData && responseData.res_data && Array.isArray(responseData.res_data)) {
+//                 let result = responseData.res_data;
 
-        const response = await axios.get('http://103.141.218.26:8080/Hitachi/api/panel_health_data_report_ajax_api.php');
+//                 if (atmid) {
+//                     // Filter results by atmid if atmid is provided
+//                     result = result.filter(record => record.atmid.includes(atmid));
+//                 }
 
-        const data = response.data[0].res_data;
+//                 const cleanedResult = result.slice(offset, offset + recordsPerPage);
 
-        // Reformat the data if needed
-        const formattedData = data.map(item => {
-            if (item.zone_config) {
-                try {
-                    item.zone_config = JSON.parse(item.zone_config.replace(/\\"/g, '"'));
-                } catch (e) {
-                    console.error('Error parsing zone_config:', e);
-                }
-            }
-            return item;
-        });
+//                 // Parse the zone_config field
+//                 cleanedResult.forEach(record => {
+//                     if (record.zone_config) {
+//                         try {
+//                             const parsedZoneConfig = JSON.parse(record.zone_config);
+//                             record.zone_config = parsedZoneConfig;
+//                         } catch (e) {
+//                             console.error('Error parsing zone_config:', e);
+//                         }
+//                     }
+//                 });
 
-        res.status(200).json({ data: formattedData });
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'An error occurred while fetching and formatting the data' });
-    }
-});
-
-
+//                 if (!atmid) {
+//                     const totalCount = result.length;
+//                     res.status(200).json({ data: cleanedResult, totalCount });
+//                 } else {
+//                     res.status(200).json({ data: cleanedResult });
+//                 }
+//             } else {
+//                 console.error('Error: Response data is not in the expected format.');
+//                 res.status(500).json({ error: 'Error fetching panel health data' });
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Error fetching panel health data:', error);
+//             res.status(500).json({ error: 'Error fetching panel health data' });
+//         });
+// });
 
 
 app.get('/PanelHealthDetailsapid', (req, res) => {
@@ -1162,19 +1424,31 @@ app.get('/PanelHealthDetailsapid', (req, res) => {
     const recordsPerPage = 50;
     const offset = (page - 1) * recordsPerPage;
     const atmid = req.query.atmid || '';
+    const filterStatus = req.query.status || ''; // Add status as a query parameter
+
     const apiUrl = 'http://103.141.218.26:8080/Hitachi/api/panel_health_data_report_ajax_api.php';
 
-    const params = {
-        atmid
-    };
-
-    axios.get(apiUrl, { params })
+    axios.get(apiUrl)
         .then(response => {
             const responseData = response.data[0];
 
             if (responseData && responseData.res_data && Array.isArray(responseData.res_data)) {
-                const result = responseData.res_data.slice(offset, offset + recordsPerPage);
-                const cleanedResult = result.map(record => {
+                let result = responseData.res_data;
+
+                if (atmid) {
+                    // Filter results by atmid if atmid is provided
+                    result = result.filter(record => record.atmid.includes(atmid));
+                }
+
+                if (filterStatus) {
+                    // Filter results based on the status query parameter
+                    result = result.filter(record => {
+                        // Assuming "status" is a field in your data, adjust this as per your data structure
+                        return record.status === filterStatus;
+                    });
+                }
+                const cleanedResult = result.slice(offset, offset + recordsPerPage);
+                cleanedResult.forEach(record => {
                     if (record.zone_config) {
                         try {
                             const parsedZoneConfig = JSON.parse(record.zone_config);
@@ -1183,11 +1457,10 @@ app.get('/PanelHealthDetailsapid', (req, res) => {
                             console.error('Error parsing zone_config:', e);
                         }
                     }
-                    return record;
                 });
 
                 if (!atmid) {
-                    const totalCount = responseData.res_data.length;
+                    const totalCount = result.length;
                     res.status(200).json({ data: cleanedResult, totalCount });
                 } else {
                     res.status(200).json({ data: cleanedResult });
@@ -1205,74 +1478,10 @@ app.get('/PanelHealthDetailsapid', (req, res) => {
 
 
 
-app.get('/PanelHealthDetailsapi', (req, res) => {
-    const page = req.query.page || 1;
-    const recordsPerPage = 50;
-    const offset = (page - 1) * recordsPerPage;
-    const atmid = req.query.atmid || '';
-
-    let query = `SELECT * FROM panel_health_api_response`;
-
-    if (atmid) {
-        query += ` WHERE atmid LIKE '%${atmid}%'`;
-    }
-
-    query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
-
-    db.query(query, (err, result) => {
-        if (err) {
-            console.error('Error fetching panel health data:', err);
-            res.status(500).json({ error: 'Error fetching panel health data' });
-        } else {
-            if (!atmid) {
-                const totalCountQuery = `SELECT COUNT(*) AS panel_count FROM panel_health_api_response`;
-                db.query(totalCountQuery, (err, countResult) => {
-                    if (err) {
-                        console.error('Error fetching total count of records:', err);
-                        res.status(500).json({ error: 'Error fetching total count of records' });
-                    } else {
-                        const cleanedResult = result.map(record => {
-                            if (record.zone_config) {
-                                try {
-                                    const parsedZoneConfig = JSON.parse(record.zone_config);
-                                    record.zone_config = parsedZoneConfig;
-                                } catch (e) {
-                                    console.error('Error parsing zone_config:', e);
-                                }
-                            }
-                            return record;
-                        });
-
-                        res.status(200).json({ data: cleanedResult, totalCount: countResult[0].panel_count });
-                    }
-                });
-            } else {
-                // If atmid is provided, ensure that the zone_config is correctly structured in the response.
-                const cleanedResult = result.map(record => {
-                    if (record.zone_config) {
-                        try {
-                            const parsedZoneConfig = JSON.parse(record.zone_config);
-                            record.zone_config = parsedZoneConfig;
-                        } catch (e) {
-                            console.error('Error parsing zone_config:', e);
-                        }
-                    }
-                    return record;
-                });
-
-                res.status(200).json({ data: cleanedResult });
-            }
-        }
-    });
-});
-
-
 
 const formatDate = (inputDate) => {
 
     const dateObj = new Date(inputDate);
-
-
     const year = dateObj.getFullYear();
     const month = String(dateObj.getMonth() + 1).padStart(2, '0');
     const day = String(dateObj.getDate()).padStart(2, '0');
@@ -1622,38 +1831,67 @@ app.get('/ExportAllSites', (req, res) => {
 
     let query = `
     SELECT
-    dh.atmid,
     dh.ip,
-    CASE
-        WHEN dh.login_status = 0 THEN 'working'
-        ELSE 'not working'
-    END AS login_status,
-    s.City,
-    s.State,
-    s.Zone,
-    DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
     dh.cam1,
     dh.cam2,
     dh.cam3,
     dh.cam4,
+    dh.latency,
     CASE
         WHEN dh.hdd = 'ok' THEN 'working'
         ELSE 'not working'
     END AS hdd_status,
+    CASE
+        WHEN dh.login_status = 0 THEN 'working'
+        ELSE 'not working'
+    END AS login_status,
+    dh.atmid,
     dh.dvrtype,
+    DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
     DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
-    DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to
+    DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
+    DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
+    s.City,
+    s.State,
+    s.Zone,
+    ps.rtsp_port,
+    ps.sdk_port,
+    ps.router_port,
+    ps.http_port,
+    ps.ai_port,
+    psnr.http_port AS http_port_status,
+    psnr.sdk_port AS sdk_port_status,
+    psnr.router_port AS router_port_status,
+    psnr.rtsp_port AS rtsp_port_status,
+    psnr.ai_port AS ai_port_status
 FROM
     dvr_health dh
 JOIN
     sites s
 ON
-    dh.atmid = s.ATMID;
+    dh.atmid = s.ATMID
+LEFT JOIN
+    port_status ps
+ON
+    dh.atmid = ps.ATMID
+LEFT JOIN (
+    SELECT
+        site_id,
+        MAX(rectime) AS latest_rectime
+    FROM
+        port_status_network_report
+    GROUP BY
+        site_id
+) AS latest_status
+ON
+    ps.site_sn = latest_status.site_id
+LEFT JOIN port_status_network_report psnr
+ON
+    ps.site_sn = psnr.site_id
+    AND latest_status.latest_rectime = psnr.rectime
 `;
 
-    // if (atmid) {
-    //     query += ` WHERE LOWER(dh.atmid) LIKE '%${atmid.toLowerCase()}%'`;
-    // }
+
 
     db.query(query, (err, result) => {
         if (err) {
@@ -1894,6 +2132,40 @@ app.post('/login', (req, res) => {
         }
     });
 });
+
+app.get('/ExportPanelHealthDetails', async (req, res) => {
+    const apiUrl = 'http://103.141.218.26:8080/Hitachi/api/panel_health_data_report_ajax_api.php';
+
+    try {
+        const response = await axios.get(apiUrl);
+        const responseData = response.data[0];
+
+        if (responseData && responseData.res_data && Array.isArray(responseData.res_data)) {
+            let result = responseData.res_data;
+
+            result.forEach(record => {
+                // Parse the 'zone_config' field if it exists
+                if (record.zone_config) {
+                    try {
+                        const parsedZoneConfig = JSON.parse(record.zone_config);
+                        record.zone_config = parsedZoneConfig;
+                    } catch (e) {
+                        console.error('Error parsing zone_config:', e);
+                    }
+                }
+            });
+
+            res.status(200).json({ data: result });
+        } else {
+            console.error('Error: Response data is not in the expected format.');
+            res.status(500).json({ error: 'Error fetching panel health data' });
+        }
+    } catch (error) {
+        console.error('Error fetching panel health data:', error);
+        res.status(500).json({ error: 'Error fetching panel health data' });
+    }
+});
+
 
 app.get('/verify_id', (req, res) => {
     const query = `

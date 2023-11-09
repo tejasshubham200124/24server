@@ -43,16 +43,15 @@ const TableRow = ({ users, index }) => {
             <td style={{ fontWeight: 600, color: (users.http_port_status === 'Y' || users.http_port_status === 'O') ? 'green' : 'red' }}>
                 {users.http_port_status === 'Y' || users.http_port_status === 'O' ? <LiaInternetExplorer size={22} color="green" /> : <LiaInternetExplorer size={22} color="red" />}
             </td>
+            <td style={{ fontWeight: 700, color: (users.rtsp_port_status === 'Y' || users.rtsp_port_status === 'O') ? 'green' : 'red' }}>
+                {users.rtsp_port_status === 'Y' || users.rtsp_port_status === 'O' ? <BsRouter size={20} color="green" /> : <BsRouter size={20} color="red" />}
+            </td>
             <td style={{ fontWeight: 700, color: (users.sdk_port_status === 'Y' || users.sdk_port_status === 'O') ? 'green' : 'red' }}>
                 {users.sdk_port_status === 'Y' || users.sdk_port_status === 'O' ? <BiSolidVideoRecording size={20} color="green" /> : <BiSolidVideoRecording size={20} color="red" />}
             </td>
             <td style={{ fontWeight: 700, color: (users.router_port_status === 'Y' || users.router_port_status === 'O') ? 'green' : 'red' }}>
                 {users.router_port_status === 'Y' || users.router_port_status === 'O' ? <TbSdk size={20} color="green" /> : <TbSdk size={20} color="red" />}
             </td>
-            <td style={{ fontWeight: 700, color: (users.rtsp_port_status === 'Y' || users.rtsp_port_status === 'O') ? 'green' : 'red' }}>
-                {users.rtsp_port_status === 'Y' || users.rtsp_port_status === 'O' ? <BsRouter size={20} color="green" /> : <BsRouter size={20} color="red" />}
-            </td>
-
             <td style={{ fontWeight: 700, color: (users.ai_port_status === 'Y' || users.ai_port_status === 'O') ? 'green' : 'red', fontWeight: 600, fontSize: '13px' }}>
                 {users.ai_port_status === 'Y' || users.ai_port_status === 'O' ? <FaRaspberryPi size={20} color="green" /> : <FaRaspberryPi size={20} color="red" />}
             </td>

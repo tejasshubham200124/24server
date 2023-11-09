@@ -5,7 +5,7 @@ import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { FiArrowUp, FiArrowDown } from 'react-icons/fi'
 
-const ExampleTwo = () => {
+const NetworkNotWorking = () => {
     const [post, setPost] = useState([]);
     const [number, setNumber] = useState(1);
     const [postPerPage] = useState(50);
@@ -25,7 +25,7 @@ const ExampleTwo = () => {
     const fetchAllSitesData = (page) => {
         setLoading(true);
 
-        let apiUrl = `${process.env.REACT_APP_DVRHEALTH_API_URL}/networkreporttwo?page=${page}`;
+        let apiUrl = `${process.env.REACT_APP_DVRHEALTH_API_URL}/networkreportnotworking?page=${page}`;
 
         if (searchTerm) {
             apiUrl += `&atmid=${searchTerm}`;
@@ -169,4 +169,4 @@ const ExampleTwo = () => {
     );
 };
 
-export default ExampleTwo;
+export default NetworkNotWorking;

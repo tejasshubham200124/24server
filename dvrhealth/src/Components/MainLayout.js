@@ -11,10 +11,8 @@ const { Header, Content, Footer } = Layout;
 
 
 const App = () => {
-
-
+    
     const navigate = useNavigate();
-
     const handleSelectChange = (event) => {
         const selectedUrl = event.target.value;
         if (selectedUrl) {
@@ -96,6 +94,7 @@ const App = () => {
                             <option value="/admin">Dvr Health</option>
                             <option value="/admin/Comfort">Comfort Panel</option>
                             <option value="/admin/PanelHealth">Panel Health</option>
+                            <option value="/admin/NetworkReport">Network Report</option>
                         </select>
                     </div>
                 </div>

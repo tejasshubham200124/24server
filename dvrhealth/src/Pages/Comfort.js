@@ -11,7 +11,7 @@ const Comfort = () => {
     const [postPerPage] = useState(50);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchTermEntered, setSearchTermEntered] = useState('');
-
+    const [data, setData] = useState([])
     const [loading, setLoading] = useState(true);
     const [totalCount, setTotalCount] = useState(0);
 
@@ -30,6 +30,7 @@ const Comfort = () => {
         if (searchTerm) {
             apiUrl += `&atmid=${searchTerm}`;
         }
+
 
         axios
             .get(apiUrl)
@@ -66,26 +67,26 @@ const Comfort = () => {
     };
 
 
-    const exportToExcel = () => {
-        const fileType =
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-        const fileExtension = '.xlsx';
-        const fileName = 'Error_HDD';
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/ExportPanelHealthDetails`);
+                setData(response.data.data);
+            } catch (error) {
+                console.error('Error fetching data from API:', error);
+            }
+            setLoading(false);
+        };
 
-        const ws = XLSX.utils.json_to_sheet(post);
-        const wb = { Sheets: { data: ws }, SheetNames: ['data'] };
-        const excelBuffer = XLSX.write(wb, {
-            bookType: 'xlsx',
-            type: 'array',
-        });
-        const data = new Blob([excelBuffer], { type: fileType });
-        const href = URL.createObjectURL(data);
-        const link = document.createElement('a');
-        link.href = href;
-        link.download = fileName + fileExtension;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        fetchData();
+    }, []);
+
+    const exportToExcel = () => {
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
+        XLSX.writeFile(wb, 'Online_Sites.xlsx');
     };
 
     const getZoneStatus = (zone) => {
@@ -150,7 +151,6 @@ const Comfort = () => {
                             <button onClick={exportToExcel} className="btn btn-primary mt-3">
                                 Export to Excel
                             </button>
-
                         </div>
                         <div className="col-6 d-flex justify-content-end">
                             <div className='col-4 text-end login-form2'>
@@ -172,16 +172,6 @@ const Comfort = () => {
                     </div>
                     <div style={{ overflowY: 'auto', scrollbarWidth: 'thin' }}>
                         <Table className='custom-tablepanel mt-4'>
-                            {/* <thead>
-                                <tr>
-                                    <th>Sr No</th>
-                                    <th>ATM ID</th>
-                                    <th>Panel Name</th>
-                                    {post[0].zone_config.map((zone, zoneIndex) => (
-                                        <th key={zoneIndex}>{zone.zone_name}</th>
-                                    ))}
-                                </tr>
-                            </thead> */}
                             <thead>
                                 <tr>
                                     <th>Sr No</th>
@@ -196,7 +186,6 @@ const Comfort = () => {
                                     )}
                                 </tr>
                             </thead>
-
                             <tbody>
                                 {post.map((users, index) => (
                                     <tr key={index}>
@@ -215,8 +204,6 @@ const Comfort = () => {
                                     </tr>
                                 ))}
                             </tbody>
-
-
                         </Table>
 
                         <ReactPaginate

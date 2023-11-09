@@ -38,6 +38,10 @@ import RecNotAvailable from './Pages/RecNotAvailable';
 import Logout from './Utils/Logout';
 import PanelHealth from './Pages/PanelHealth';
 import Comfort from './Pages/Comfort';
+import NetworkReport from './Pages/NetworkReport';
+import NetworkTotalSites from './Pages/NetworkTotalSites';
+import NetworkWorking from './Pages/NetworkWorking';
+import NetworkNotWorking from './Pages/NetworkNotWorking';
 
 
 function App() {
@@ -117,7 +121,10 @@ function App() {
         <Route path="Logout" element={<Logout />} />
         <Route path="PanelHealth" element={<PanelHealth />} />
         <Route path="Comfort" element={<Comfort />} />
-
+        <Route path="NetworkReport" element={<NetworkReport />} />
+        <Route path="NetworkTotalSites" element={<NetworkTotalSites />} />
+        <Route path="NetworkWorking" element={<NetworkWorking />} />
+        <Route path="NetworkNotWorking" element={<NetworkNotWorking />} />
       </Route>
     </Routes>
   );
