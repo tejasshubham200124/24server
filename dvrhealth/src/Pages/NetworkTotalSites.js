@@ -5,7 +5,7 @@ import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { FiArrowUp, FiArrowDown } from 'react-icons/fi'
 
-const NetworkTotalSites= () => {
+const NetworkTotalSites = () => {
     const [post, setPost] = useState([]);
     const [number, setNumber] = useState(1);
     const [postPerPage] = useState(50);
@@ -70,7 +70,7 @@ const NetworkTotalSites= () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/ExportOnlineSites`);
+                const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/ExportNetworkReport`);
                 setData(response.data.data);
             } catch (error) {
                 console.error('Error fetching data from API:', error);
@@ -85,7 +85,7 @@ const NetworkTotalSites= () => {
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
-        XLSX.writeFile(wb, 'Online_Sites.xlsx');
+        XLSX.writeFile(wb, 'NetWorkReport.xlsx');
     };
 
 
@@ -130,11 +130,14 @@ const NetworkTotalSites= () => {
                             <tr>
                                 <th>Sr No</th>
                                 <th>ATM ID</th>
-                                    <th>Http Port</th>
-                                    <th>Rtsp Port</th>
-                                    <th>Router Port</th>
-                                    <th>SDK Port</th>
-                                    <th>AI Port</th>
+                                <th>Bank</th>
+                                <th>Rec Time</th>
+                                <th>Http Port</th>
+                                <th>Rtsp Port</th>
+                                <th>Router Port</th>
+                                <th>SDK Port</th>
+                                <th>AI Port</th>
+
                             </tr>
                         </thead>
                         <tbody>
@@ -142,13 +145,15 @@ const NetworkTotalSites= () => {
                                 <tr>
                                     <td>{index + 1}</td>
                                     <td style={{ color: 'darkblue', fontWeight: 'bold', fontSize: '13px' }}>
-                                        {users.atmid}
+                                        {users.ATMID}
                                     </td>
+                                    <td>{users.Bank}</td>
+                                    <td>{users.rectime}</td>
                                     <td>{users.http_port}</td>
-                                    <td>{users.router_port}</td>
                                     <td>{users.rtsp_port}</td>
+                                    <td>{users.router_port}</td>                     
                                     <td>{users.sdk_port}</td>
-                                    <td>{users.ai_port}</td>   
+                                    <td>{users.ai_port}</td>
                                 </tr>
                             ))}
                         </tbody>

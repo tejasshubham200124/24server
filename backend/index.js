@@ -25,7 +25,6 @@ const db = mysql.createConnection({
     database: 'esurv'
 });
 
-
 // const db = mysql.createConnection({
 //     host: 'localhost',
 //     user: 'root',
@@ -292,6 +291,7 @@ app.get('/NetworkReportWorkingCount', (req, res) => {
     
     
     `;
+    
 
     db.query(query, (err, result) => {
         if (err) {
@@ -306,6 +306,7 @@ app.get('/NetworkReportWorkingCount', (req, res) => {
 });
 
 
+
 app.get('/NetworkReportNotWorkingCount', (req, res) => {
     const query = `
     SELECT COUNT(*) AS notworking_records
@@ -317,7 +318,7 @@ FROM (
       AND psnr.rectime = (
         SELECT MAX(rectime)
         FROM port_status_network_report
-        WHERE site_id = psnr.site_id
+        // WHERE site_id = psnr.site_id
         AND latency = 0
       )
     GROUP BY psnr.site_id
@@ -493,22 +494,24 @@ app.get('/networkreporttwo', (req, res) => {
     const offset = (page - 1) * recordsPerPage;
 
     const query = `
-        SELECT
-            psnr.site_id,
-            psnr.http_port,
-            psnr.sdk_port,
-            psnr.ai_port,
-            psnr.router_port,
-            psnr.rtsp_port,
-            ps.atmid
-        FROM port_status_network_report psnr
-        JOIN (
-            SELECT site_id, MAX(rectime) AS latest_rectime
-            FROM port_status_network_report
-            GROUP BY site_id
-        ) AS latest_status
-        ON psnr.site_id = latest_status.site_id AND psnr.rectime = latest_status.latest_rectime
-        JOIN port_status ps ON psnr.site_id = ps.site_sn
+    SELECT
+    p.site_id,
+    p.http_port,
+    p.rtsp_port,
+    p.router_port,
+    p.sdk_port,
+    p.ai_port,
+    DATE_FORMAT(p.rectime, '%Y-%m-%d %H:%i:%s') AS rectime,
+    s.ATMID,
+    s.Bank
+FROM
+    port_status_network_report p
+JOIN
+    sites s ON p.site_id = s.SN AND s.live = 'Y'
+WHERE
+    (p.site_id, p.rectime) IN (SELECT site_id, MAX(rectime) FROM port_status_network_report GROUP BY site_id)
+ORDER BY
+    p.site_id ASC
         LIMIT ${recordsPerPage} OFFSET ${offset};
     `;
 
@@ -1827,7 +1830,6 @@ ON
 
 
 app.get('/ExportAllSites', (req, res) => {
-    // const atmid = req.query.atmid || '';
 
     let query = `
     SELECT
@@ -1890,9 +1892,39 @@ ON
     ps.site_sn = psnr.site_id
     AND latest_status.latest_rectime = psnr.rectime
 `;
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error fetching DVR health data for export:', err);
+            res.status(500).json({ error: 'Error fetching DVR health data for export' });
+        } else {
+            res.status(200).json({ data: result });
+        }
+    });
+});
 
 
+app.get('/ExportNetworkReport', (req, res) => {
+    let query = `
+    SELECT
+    p.site_id,
+    p.http_port,
+    p.rtsp_port,
+    p.router_port,
+    p.sdk_port,
+    p.ai_port,
+    DATE_FORMAT(p.rectime, '%Y-%m-%d %H:%i:%s') AS rectime,
+    s.ATMID,
+    s.Bank
+FROM
+    port_status_network_report p
+JOIN
+    sites s ON p.site_id = s.SN AND s.live = 'Y'
+WHERE
+    (p.site_id, p.rectime) IN (SELECT site_id, MAX(rectime) FROM port_status_network_report GROUP BY site_id)
+ORDER BY
+    p.site_id ASC
 
+`;
     db.query(query, (err, result) => {
         if (err) {
             console.error('Error fetching DVR health data for export:', err);

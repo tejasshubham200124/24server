@@ -148,8 +148,8 @@ const SiteTable= () => {
                                     <th>Dvr type</th>
                                     <th>HTTP Port</th>
                                     <th>RTSP Port</th>
-                                    <th>SDK Port</th>
                                     <th>Router Port</th>
+                                    <th>SDK Port</th>
                                     <th>AI Port</th>
                                     <th>Camera Status</th>
                                     <th>Rec From</th>
