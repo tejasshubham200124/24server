@@ -23,6 +23,7 @@ const TableRow = ({ users, index }) => {
                     {users.atmid}
                 </Link>
             </td>
+            <td style={{ color: 'teal', fontWeight: 600, fontSize: '13px' }}>{users.Bank}</td>
             <td>
                 {users.login_status === 'working' ? (
                     <FiArrowUp style={{ color: 'green', fontWeight: 600, fontSize: '18px' }} />
@@ -40,21 +41,22 @@ const TableRow = ({ users, index }) => {
             <td style={{ color: 'maroon', fontWeight: 600, fontSize: '13px' }}>{users.last_communication}</td>
             <td style={{ color: 'skyblue', fontWeight: 'bold', fontSize: '13px' }}>{users.ip}</td>
             <td style={{ color: 'orange', fontWeight: 600, fontSize: '13px' }}>{users.dvrtype}</td>
-            <td style={{ fontWeight: 600, color: (users.http_port_status === 'Y' || users.http_port_status === 'O') ? 'green' : 'red' }}>
-                {users.http_port_status === 'Y' || users.http_port_status === 'O' ? <LiaInternetExplorer size={22} color="green" /> : <LiaInternetExplorer size={22} color="red" />}
+            <td style={{ fontWeight: 600, color: (users.http_port_status === 'Y') ? 'green' : (users.http_port_status === 'O') ? 'orange' : 'red' }}>
+                {users.http_port_status === 'Y' ? <LiaInternetExplorer size={22} color="green" /> : (users.http_port_status === 'O') ? <LiaInternetExplorer size={22} color="orange" /> : <LiaInternetExplorer size={22} color="red" />}
             </td>
-            <td style={{ fontWeight: 700, color: (users.rtsp_port_status === 'Y' || users.rtsp_port_status === 'O') ? 'green' : 'red' }}>
-                {users.rtsp_port_status === 'Y' || users.rtsp_port_status === 'O' ? <BsRouter size={20} color="green" /> : <BsRouter size={20} color="red" />}
+            <td style={{ fontWeight: 700, color: (users.rtsp_port_status === 'Y') ? 'green' : (users.rtsp_port_status === 'O') ? 'orange' : 'red' }}>
+                {users.rtsp_port_status === 'Y' ? <BsRouter size={20} color="green" /> : (users.rtsp_port_status === 'O') ? <BsRouter size={20} color="orange" /> : <BsRouter size={20} color="red" />}
             </td>
-            <td style={{ fontWeight: 700, color: (users.sdk_port_status === 'Y' || users.sdk_port_status === 'O') ? 'green' : 'red' }}>
-                {users.sdk_port_status === 'Y' || users.sdk_port_status === 'O' ? <BiSolidVideoRecording size={20} color="green" /> : <BiSolidVideoRecording size={20} color="red" />}
+            <td style={{ fontWeight: 700, color: (users.router_port_status === 'Y') ? 'green' : (users.router_port_status === 'O') ? 'orange' : 'red' }}>
+                {users.router_port_status === 'Y' ? <TbSdk size={20} color="green" /> : (users.router_port_status === 'O') ? <TbSdk size={20} color="orange" /> : <TbSdk size={20} color="red" />}
             </td>
-            <td style={{ fontWeight: 700, color: (users.router_port_status === 'Y' || users.router_port_status === 'O') ? 'green' : 'red' }}>
-                {users.router_port_status === 'Y' || users.router_port_status === 'O' ? <TbSdk size={20} color="green" /> : <TbSdk size={20} color="red" />}
+            <td style={{ fontWeight: 700, color: (users.sdk_port_status === 'Y') ? 'green' : (users.sdk_port_status === 'O') ? 'orange' : 'red' }}>
+                {users.sdk_port_status === 'Y' ? <BiSolidVideoRecording size={20} color="green" /> : (users.sdk_port_status === 'O') ? <BiSolidVideoRecording size={20} color="orange" /> : <BiSolidVideoRecording size={20} color="red" />}
             </td>
-            <td style={{ fontWeight: 700, color: (users.ai_port_status === 'Y' || users.ai_port_status === 'O') ? 'green' : 'red', fontWeight: 600, fontSize: '13px' }}>
-                {users.ai_port_status === 'Y' || users.ai_port_status === 'O' ? <FaRaspberryPi size={20} color="green" /> : <FaRaspberryPi size={20} color="red" />}
+            <td style={{ fontWeight: 700, color: (users.ai_port_status === 'Y') ? 'green' : (users.ai_port_status === 'O') ? 'orange' : 'red', fontWeight: 600, fontSize: '13px' }}>
+                {users.ai_port_status === 'Y' ? <FaRaspberryPi size={20} color="green" /> : (users.ai_port_status === 'O') ? <FaRaspberryPi size={20} color="orange" /> : <FaRaspberryPi size={20} color="red" />}
             </td>
+
 
             <td>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

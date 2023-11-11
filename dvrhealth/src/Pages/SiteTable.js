@@ -135,6 +135,7 @@ const SiteTable= () => {
                                 <tr>
                                     <th>Sr No</th>
                                     <th>ATM ID</th>
+                                    <th>Bank</th>
                                     <th>
                                         Up/Down
                                     </th>
