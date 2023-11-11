@@ -130,11 +130,13 @@ const NetworkWorking = () => {
                             <tr>
                                 <th>Sr No</th>
                                 <th>ATM ID</th>
-                                    <th>Http Port</th>
-                                    <th>Rtsp Port</th>
-                                    <th>Router Port</th>
-                                    <th>SDK Port</th>
-                                    <th>AI Port</th>
+                                <th>Bank</th>
+                                <th>Latency</th>
+                                <th>Http Port</th>
+                                <th>Rtsp Port</th>
+                                <th>Router Port</th>
+                                <th>SDK Port</th>
+                                <th>AI Port</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -144,11 +146,13 @@ const NetworkWorking = () => {
                                     <td style={{ color: 'darkblue', fontWeight: 'bold', fontSize: '13px' }}>
                                         {users.ATMID}
                                     </td>
-                                    <td>{users.http_port}</td>
-                                    <td>{users.router_port}</td>
-                                    <td>{users.rtsp_port}</td>
-                                    <td>{users.sdk_port}</td>
-                                    <td>{users.ai_port}</td>   
+                                    <td style={{ color: 'teal', fontWeight: 600, fontSize: '13px' }}>{users.Bank}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.latency}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.http_port}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}> {users.rtsp_port}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.router_port}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.sdk_port}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.ai_port}</td>
                                 </tr>
                             ))}
                         </tbody>

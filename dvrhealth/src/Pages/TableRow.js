@@ -58,7 +58,7 @@ const TableRow = ({ users, index }) => {
             </td>
 
 
-            <td>
+        <td>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div
                         style={{

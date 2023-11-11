@@ -25,11 +25,12 @@ const NetworkReport = () => {
     }, []);
 
     useEffect(() => {
-        fetch(`${process.env.REACT_APP_DVRHEALTH_API_URL}/NetworkReportWorkingCount`)
+        fetch(`${process.env.REACT_APP_DVRHEALTH_API_URL}/NetworkReportNotWorkingCount`)
             .then(response => response.json())
             .then(data => setNetworkNotWorking(data.notworking_records))
             .catch(error => console.error('Error fetching number of offline sites:', error));
     }, []);
+    {console.log(networNotkWorking)}
 
     return (
         <div>

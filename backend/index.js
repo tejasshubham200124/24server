@@ -309,22 +309,19 @@ app.get('/NetworkReportWorkingCount', (req, res) => {
 
 app.get('/NetworkReportNotWorkingCount', (req, res) => {
     const query = `
-    SELECT COUNT(*) AS notworking_records
-FROM (
-    SELECT psnr.site_id
-    FROM port_status_network_report psnr
-    JOIN port_status ps ON psnr.site_id = ps.site_sn
-    WHERE psnr.latency = 0
-      AND psnr.rectime = (
-        SELECT MAX(rectime)
-        FROM port_status_network_report
-        // WHERE site_id = psnr.site_id
-        AND latency = 0
-      )
-    GROUP BY psnr.site_id
-) AS subquery;
-
-    
+    SELECT
+    COUNT(*) AS notworking_records
+FROM
+    (
+        SELECT
+            MAX(rectime) AS max_rectime
+        FROM
+            port_status_network_report
+        WHERE
+            latency = 0
+        GROUP BY
+            site_id
+    ) AS subquery;
     
     `;
 
@@ -346,20 +343,28 @@ app.get('/networkreportworking', (req, res) => {
     const atmid = req.query.atmid || '';
 
     const query = `
-        SELECT
-            psnr.site_id,
-            psnr.http_port,
-            psnr.sdk_port,
-            psnr.ai_port,
-            psnr.router_port,
-            psnr.rtsp_port,
-            ps.ATMID
-        FROM port_status_network_report psnr
-        JOIN port_status ps ON psnr.site_id = ps.site_sn
-        WHERE psnr.latency > 0
-          AND DATE(psnr.rectime) = CURRENT_DATE
-        GROUP BY psnr.site_id
-        ORDER BY psnr.site_id ASC
+    SELECT
+    psnr.site_id,
+    psnr.http_port,
+    psnr.sdk_port,
+    psnr.ai_port,
+    psnr.router_port,
+    psnr.rtsp_port,
+    psnr.rectime,
+    psnr.latency,
+    ps.ATMID
+FROM
+    port_status_network_report psnr
+JOIN
+    port_status ps ON psnr.site_id = ps.site_sn
+WHERE
+    psnr.latency > 0
+    AND DATE(psnr.rectime) = CURRENT_DATE
+GROUP BY
+    psnr.site_id
+ORDER BY
+    psnr.site_id ASC
+
         LIMIT ${recordsPerPage} OFFSET ${offset};
     `;
 
@@ -370,11 +375,27 @@ app.get('/networkreportworking', (req, res) => {
         } else {
             if (!atmid) {
                 const totalCountQuery = `
-                    SELECT COUNT(DISTINCT psnr.site_id) AS totalCount
-                    FROM port_status_network_report psnr
-                    JOIN port_status ps ON psnr.site_id = ps.site_sn
-                    WHERE psnr.latency > 0
-                      AND DATE(psnr.rectime) = CURRENT_DATE;
+                SELECT
+                psnr.site_id,
+                psnr.http_port,
+                psnr.sdk_port,
+                psnr.ai_port,
+                psnr.router_port,
+                psnr.rtsp_port,
+                psnr.rectime,
+                psnr.latency,
+                ps.ATMID
+            FROM
+                port_status_network_report psnr
+            JOIN
+                port_status ps ON psnr.site_id = ps.site_sn
+            WHERE
+                psnr.latency > 0
+                AND DATE(psnr.rectime) = CURRENT_DATE
+            GROUP BY
+                psnr.site_id
+            ORDER BY
+                psnr.site_id ASC 
                 `;
                 db.query(totalCountQuery, (err, countResult) => {
                     if (err) {
