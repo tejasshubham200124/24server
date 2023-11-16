@@ -338,11 +338,14 @@ FROM
         }
     });
 });
+
 app.get('/networkreportworking', (req, res) => {
     const recordsPerPage = 50;
     const page = req.query.page || 1;
     const offset = (page - 1) * recordsPerPage;
     const ATMID = req.query.ATMID || '';
+
+    console.log('ATMID:', ATMID)
 
     const query = `
     SELECT
@@ -388,7 +391,7 @@ ORDER BY
                     WHERE
                         psnr.latency > 0
                         AND DATE(psnr.rectime) = CURRENT_DATE
-                        ${ATMID ? `AND st.ATMID = '${ATMID}'` : ''}  -- Include ATMID condition if provided
+                        
                     GROUP BY
                         psnr.site_id
                 ) AS subquery;

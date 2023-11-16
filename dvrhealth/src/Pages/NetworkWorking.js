@@ -31,6 +31,8 @@ const NetworkWorking = () => {
             apiUrl += `&ATMID=${searchTerm}`;
         }
 
+        console.log('Search Term (ATMID):', searchTerm); 
+
         axios
             .get(apiUrl)
             .then((response) => {
