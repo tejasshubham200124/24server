@@ -352,7 +352,7 @@ app.get('/networkreportworking', (req, res) => {
     psnr.ai_port,
     psnr.router_port,
     psnr.rtsp_port,
-    psnr.rectime,
+    DATE_FORMAT(psnr.rectime, '%Y-%m-%d %H:%i:%s') AS rectime,
     psnr.latency,
     st.Bank,
     st.ATMID  -- Use the ATMID from the sites table
