@@ -339,6 +339,68 @@ FROM
     });
 });
 
+app.get('/OnlineSiteDetails', (req, res) => {
+    const page = req.query.page || 1;
+    const recordsPerPage = 50;
+    const offset = (page - 1) * recordsPerPage;
+    const atmid = req.query.atmid || '';
+
+    let query = `
+        SELECT
+            dh.atmid,
+            dh.login_status,
+            DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
+            dh.cam1,
+            dh.cam2,
+            dh.cam3,
+            dh.cam4,
+            dh.dvrtype,
+            DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+            DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
+            DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
+            DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,          
+            dh.ip AS routerip,
+            CASE WHEN dh.hdd = 'ok' THEN 'working' ELSE 'not working' END AS hdd_status,
+            s.city,
+            s.state,
+            s.zone,
+            CONCAT(FLOOR(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()) / 60), ':', MOD(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()), 60)) AS time_difference_hours_minutes
+        FROM
+            dvr_health dh
+        JOIN
+            sites s ON dh.atmid = s.ATMID
+        WHERE
+            dh.login_status = 0
+            AND s.live = 'Y'`;
+
+    if (atmid) {
+        query += ` AND dh.atmid LIKE '%${atmid}%'`;
+    }
+
+    query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
+
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error fetching DVR health data:', err);
+            res.status(500).json({ error: 'Error fetching DVR health data' });
+        } else {
+            if (!atmid) {
+                const totalCountQuery = `SELECT COUNT(*) AS online_count FROM dvr_health WHERE login_status = 0`;
+                db.query(totalCountQuery, (err, countResult) => {
+                    if (err) {
+                        console.error('Error fetching total count of records:', err);
+                        res.status(500).json({ error: 'Error fetching total count of records' });
+                    } else {
+                        res.status(200).json({ data: result, totalCount: countResult[0].online_count });
+                    }
+                });
+            } else {
+                res.status(200).json({ data: result });
+            }
+        }
+    });
+});
+
 app.get('/networkreportworking', (req, res) => {
     const recordsPerPage = 50;
     const page = req.query.page || 1;
@@ -369,9 +431,15 @@ WHERE
 GROUP BY
     psnr.site_id
 ORDER BY
-    psnr.site_id ASC
-        LIMIT ${recordsPerPage} OFFSET ${offset}
-    `;
+    psnr.site_id ASC`;
+
+
+    if (ATMID) {
+        query += ` AND st.ATMID LIKE '%${ATMID}%'`;
+    }
+
+    query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
+    
     db.query(query, (err, result) => {
         if (err) {
             console.error('Error fetching network report data:', err);
@@ -1334,119 +1402,9 @@ app.get('/OfflineSiteDetails', (req, res) => {
 });
 
 
-app.get('/OnlineSiteDetails', (req, res) => {
-    const page = req.query.page || 1;
-    const recordsPerPage = 50;
-    const offset = (page - 1) * recordsPerPage;
-    const atmid = req.query.atmid || '';
-
-    let query = `
-        SELECT
-            dh.atmid,
-            dh.login_status,
-            DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
-            dh.cam1,
-            dh.cam2,
-            dh.cam3,
-            dh.cam4,
-            dh.dvrtype,
-            DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
-            DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
-            DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
-            DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,          
-            dh.ip AS routerip,
-            CASE WHEN dh.hdd = 'ok' THEN 'working' ELSE 'not working' END AS hdd_status,
-            s.city,
-            s.state,
-            s.zone,
-            CONCAT(FLOOR(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()) / 60), ':', MOD(TIMESTAMPDIFF(MINUTE, dh.cdate, NOW()), 60)) AS time_difference_hours_minutes
-        FROM
-            dvr_health dh
-        JOIN
-            sites s ON dh.atmid = s.ATMID
-        WHERE
-            dh.login_status = 0
-            AND s.live = 'Y'`;
-
-    if (atmid) {
-        query += ` AND dh.atmid LIKE '%${atmid}%'`;
-    }
-
-    query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
-
-    db.query(query, (err, result) => {
-        if (err) {
-            console.error('Error fetching DVR health data:', err);
-            res.status(500).json({ error: 'Error fetching DVR health data' });
-        } else {
-            if (!atmid) {
-                const totalCountQuery = `SELECT COUNT(*) AS online_count FROM dvr_health WHERE login_status = 0`;
-                db.query(totalCountQuery, (err, countResult) => {
-                    if (err) {
-                        console.error('Error fetching total count of records:', err);
-                        res.status(500).json({ error: 'Error fetching total count of records' });
-                    } else {
-                        res.status(200).json({ data: result, totalCount: countResult[0].online_count });
-                    }
-                });
-            } else {
-                res.status(200).json({ data: result });
-            }
-        }
-    });
-});
 
 
-// app.get('/PanelHealthDetailsapid', (req, res) => {
-//     const page = req.query.page || 1;
-//     const recordsPerPage = 50;
-//     const offset = (page - 1) * recordsPerPage;
-//     const atmid = req.query.atmid || '';
 
-//     const apiUrl = 'http://103.141.218.26:8080/Hitachi/api/panel_health_data_report_ajax_api.php';
-
-//     axios.get(apiUrl)
-//         .then(response => {
-//             const responseData = response.data[0];
-
-//             if (responseData && responseData.res_data && Array.isArray(responseData.res_data)) {
-//                 let result = responseData.res_data;
-
-//                 if (atmid) {
-//                     // Filter results by atmid if atmid is provided
-//                     result = result.filter(record => record.atmid.includes(atmid));
-//                 }
-
-//                 const cleanedResult = result.slice(offset, offset + recordsPerPage);
-
-//                 // Parse the zone_config field
-//                 cleanedResult.forEach(record => {
-//                     if (record.zone_config) {
-//                         try {
-//                             const parsedZoneConfig = JSON.parse(record.zone_config);
-//                             record.zone_config = parsedZoneConfig;
-//                         } catch (e) {
-//                             console.error('Error parsing zone_config:', e);
-//                         }
-//                     }
-//                 });
-
-//                 if (!atmid) {
-//                     const totalCount = result.length;
-//                     res.status(200).json({ data: cleanedResult, totalCount });
-//                 } else {
-//                     res.status(200).json({ data: cleanedResult });
-//                 }
-//             } else {
-//                 console.error('Error: Response data is not in the expected format.');
-//                 res.status(500).json({ error: 'Error fetching panel health data' });
-//             }
-//         })
-//         .catch(error => {
-//             console.error('Error fetching panel health data:', error);
-//             res.status(500).json({ error: 'Error fetching panel health data' });
-//         });
-// });
 
 
 app.get('/PanelHealthDetailsapid', (req, res) => {
