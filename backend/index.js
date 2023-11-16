@@ -366,12 +366,9 @@ WHERE
 GROUP BY
     psnr.site_id
 ORDER BY
-    psnr.site_id ASC;
-
-
-        LIMIT ${recordsPerPage} OFFSET ${offset};
+    psnr.site_id ASC
+        LIMIT ${recordsPerPage} OFFSET ${offset}
     `;
-
     db.query(query, (err, result) => {
         if (err) {
             console.error('Error fetching network report data:', err);
