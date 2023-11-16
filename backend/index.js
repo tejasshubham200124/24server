@@ -420,26 +420,24 @@ app.get('/networkreportworking', (req, res) => {
     DATE_FORMAT(psnr.rectime, '%Y-%m-%d %H:%i:%s') AS rectime,
     psnr.latency,
     st.Bank,
-    st.ATMID  -- Use the ATMID from the sites table
+    st.ATMID  
 FROM
     port_status_network_report psnr
 JOIN
-    sites st ON psnr.site_id = st.SN  -- Adjust the join condition
+    sites st ON psnr.site_id = st.SN  
 WHERE
     psnr.latency > 0
     AND DATE(psnr.rectime) = CURRENT_DATE
 GROUP BY
     psnr.site_id
-ORDER BY
-    psnr.site_id ASC`;
-
+ `;
 
     if (atmid) {
         query += ` AND st.ATMID LIKE '%${atmid}%'`;
     }
 
     query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
-    
+
     db.query(query, (err, result) => {
         if (err) {
             console.error('Error fetching network report data:', err);
@@ -459,12 +457,10 @@ ORDER BY
                     WHERE
                         psnr.latency > 0
                         AND DATE(psnr.rectime) = CURRENT_DATE
-                        
                     GROUP BY
                         psnr.site_id
                 ) AS subquery;
-            `;
-            
+            `;   
                 db.query(totalCountQuery, (err, countResult) => {
                     if (err) {
                         console.error('Error fetching total count of records:', err);
