@@ -409,7 +409,7 @@ app.get('/networkreportworking', (req, res) => {
 
     console.log('ATMID:', atmid)
 
-    const query = `
+    let query = `
     SELECT
     psnr.site_id,
     psnr.http_port,
