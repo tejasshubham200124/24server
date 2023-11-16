@@ -3,7 +3,7 @@ import { Table } from 'react-bootstrap';
 import ReactPaginate from 'react-paginate';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
-import { FiArrowUp, FiArrowDown } from 'react-icons/fi'
+
 
 const NetworkWorking = () => {
     const [post, setPost] = useState([]);
@@ -38,8 +38,6 @@ const NetworkWorking = () => {
                 const responseData = response.data.data || [];
                 setPost(responseData);
                 setTotalCount(response.data.totalCount || 0);
-                console.log(post)
-                console.log(totalCount)
             })
             .catch((error) => {
                 console.error('API Error:', error);
@@ -72,7 +70,7 @@ const NetworkWorking = () => {
         const fetchData = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/ExportOnlineSites`);
+                const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/ExportNetworkReport`);
                 setData(response.data.data);
             } catch (error) {
                 console.error('Error fetching data from API:', error);
@@ -87,7 +85,7 @@ const NetworkWorking = () => {
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
-        XLSX.writeFile(wb, 'Online_Sites.xlsx');
+        XLSX.writeFile(wb, 'NetWorkReport.xlsx');
     };
 
 
@@ -133,12 +131,13 @@ const NetworkWorking = () => {
                                 <th>Sr No</th>
                                 <th>ATM ID</th>
                                 <th>Bank</th>
-                                <th>Latency</th>
+                                <th>Rec Time</th>
                                 <th>Http Port</th>
                                 <th>Rtsp Port</th>
                                 <th>Router Port</th>
                                 <th>SDK Port</th>
                                 <th>AI Port</th>
+
                             </tr>
                         </thead>
                         <tbody>
@@ -149,7 +148,7 @@ const NetworkWorking = () => {
                                         {users.ATMID}
                                     </td>
                                     <td style={{ color: 'teal', fontWeight: 600, fontSize: '13px' }}>{users.Bank}</td>
-                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.latency}</td>
+                                    <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.rectime}</td>
                                     <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.http_port}</td>
                                     <td style={{ fontWeight: 600, fontSize: '13px' }}> {users.rtsp_port}</td>
                                     <td style={{ fontWeight: 600, fontSize: '13px' }}>{users.router_port}</td>

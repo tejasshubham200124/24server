@@ -377,27 +377,20 @@ ORDER BY
             if (!atmid) {
                 const totalCountQuery = `
                 SELECT
-                psnr.site_id,
-                psnr.http_port,
-                psnr.sdk_port,
-                psnr.ai_port,
-                psnr.router_port,
-                psnr.rtsp_port,
-                psnr.rectime,
-                psnr.latency,
-                st.Bank,
-                st.ATMID  -- Use the ATMID from the sites table
-            FROM
-                port_status_network_report psnr
-            JOIN
-                sites st ON psnr.site_id = st.SN  -- Adjust the join condition
-            WHERE
-                psnr.latency > 0
-                AND DATE(psnr.rectime) = CURRENT_DATE
-            GROUP BY
-                psnr.site_id
-            ORDER BY
-                psnr.site_id ASC
+    COUNT(*) AS totalCount
+FROM (
+    SELECT
+        psnr.site_id
+    FROM
+        port_status_network_report psnr
+    JOIN
+        sites st ON psnr.site_id = st.SN
+    WHERE
+        psnr.latency > 0
+        AND DATE(psnr.rectime) = CURRENT_DATE
+    GROUP BY
+        psnr.site_id
+) AS subquery;
                 `;
                 db.query(totalCountQuery, (err, countResult) => {
                     if (err) {
