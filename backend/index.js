@@ -603,7 +603,7 @@ WHERE
     (p.site_id, p.rectime) IN (SELECT site_id, MAX(rectime) FROM port_status_network_report GROUP BY site_id)`;
 
     if (atmid) {
-        query += ` AND st.ATMID LIKE '%${atmid}%'`;
+        query += ` AND s.ATMID LIKE '%${atmid}%'`;
     }
 
     query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
