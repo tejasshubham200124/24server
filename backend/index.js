@@ -460,7 +460,7 @@ GROUP BY
                     GROUP BY
                         psnr.site_id
                 ) AS subquery;
-            `;   
+            `;
                 db.query(totalCountQuery, (err, countResult) => {
                     if (err) {
                         console.error('Error fetching total count of records:', err);
@@ -547,7 +547,6 @@ app.get('/networkreportnotworking', (req, res) => {
 });
 
 
-
 app.get('/networkreport', (req, res) => {
     const query = `
     SELECT
@@ -583,8 +582,9 @@ app.get('/networkreporttwo', (req, res) => {
     const recordsPerPage = 50;
     const page = req.query.page || 1;
     const offset = (page - 1) * recordsPerPage;
+    const atmid = req.query.ATMID || '';
 
-    const query = `
+    let query = `
     SELECT
     p.site_id,
     p.http_port,
@@ -600,26 +600,32 @@ FROM
 JOIN
     sites s ON p.site_id = s.SN AND s.live = 'Y'
 WHERE
-    (p.site_id, p.rectime) IN (SELECT site_id, MAX(rectime) FROM port_status_network_report GROUP BY site_id)
-ORDER BY
-    p.site_id ASC
-        LIMIT ${recordsPerPage} OFFSET ${offset};
-    `;
+    (p.site_id, p.rectime) IN (SELECT site_id, MAX(rectime) FROM port_status_network_report GROUP BY site_id)`;
+
+    if (atmid) {
+        query += ` AND st.ATMID LIKE '%${atmid}%'`;
+    }
+
+    query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
 
     db.query(query, (err, result) => {
         if (err) {
             console.error('Error fetching network report data:', err);
             res.status(500).json({ error: 'Error fetching network report data' });
         } else {
-            const totalCountQuery = `SELECT COUNT(DISTINCT site_id) AS totalCount FROM port_status_network_report`;
-            db.query(totalCountQuery, (err, countResult) => {
-                if (err) {
-                    console.error('Error fetching total count of records:', err);
-                    res.status(500).json({ error: 'Error fetching total count of records' });
-                } else {
-                    res.status(200).json({ data: result, totalCount: countResult[0].totalCount });
-                }
-            });
+            if (!atmid) {
+                const totalCountQuery = `SELECT COUNT(DISTINCT site_id) AS totalCount FROM port_status_network_report`;
+                db.query(totalCountQuery, (err, countResult) => {
+                    if (err) {
+                        console.error('Error fetching total count of records:', err);
+                        res.status(500).json({ error: 'Error fetching total count of records' });
+                    } else {
+                        res.status(200).json({ data: result, totalCount: countResult[0].totalCount });
+                    }
+                });
+            } else {
+                res.status(200).json({ data: result });
+            }
         }
     });
 });
