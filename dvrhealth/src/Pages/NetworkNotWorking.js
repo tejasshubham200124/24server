@@ -37,6 +37,7 @@ const NetworkNotWorking = () => {
                 console.log('API Response for Page', page, ':', response.data);
                 const responseData = response.data.data || [];
                 setPost(responseData);
+                console.log(post)
                 setTotalCount(response.data.totalCount || 0);
             })
             .catch((error) => {
@@ -130,11 +131,11 @@ const NetworkNotWorking = () => {
                             <tr>
                                 <th>Sr No</th>
                                 <th>ATM ID</th>
-                                    <th>Http Port</th>
-                                    <th>Rtsp Port</th>
-                                    <th>Router Port</th>
-                                    <th>SDK Port</th>
-                                    <th>AI Port</th>
+                                <th>Http Port</th>
+                                <th>Rtsp Port</th>
+                                <th>Router Port</th>
+                                <th>SDK Port</th>
+                                <th>AI Port</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -148,7 +149,7 @@ const NetworkNotWorking = () => {
                                     <td>{users.router_port}</td>
                                     <td>{users.rtsp_port}</td>
                                     <td>{users.sdk_port}</td>
-                                    <td>{users.ai_port}</td>   
+                                    <td>{users.ai_port}</td>
                                 </tr>
                             ))}
                         </tbody>

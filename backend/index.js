@@ -279,19 +279,22 @@ app.get('/NetworkReportTotalSites', (req, res) => {
 
 app.get('/NetworkReportWorkingCount', (req, res) => {
     const query = `
-    SELECT COUNT(*) AS working_count_records
-    FROM (
-      SELECT psnr.site_id
-      FROM port_status_network_report psnr
-      JOIN port_status ps ON psnr.site_id = ps.site_sn
-      WHERE psnr.latency > 0
+    SELECT
+    COUNT(*) AS working_count_records
+FROM (
+    SELECT
+        psnr.site_id
+    FROM
+        port_status_network_report psnr
+    JOIN
+        sites st ON psnr.site_id = st.SN
+    WHERE
+        psnr.latency > 0
         AND DATE(psnr.rectime) = CURRENT_DATE
-      GROUP BY psnr.site_id
-    ) AS subquery;
-    
-    
+    GROUP BY
+        psnr.site_id
+) AS subquery;
     `;
-    
 
     db.query(query, (err, result) => {
         if (err) {
@@ -304,7 +307,6 @@ app.get('/NetworkReportWorkingCount', (req, res) => {
         }
     });
 });
-
 
 
 app.get('/NetworkReportNotWorkingCount', (req, res) => {
@@ -352,18 +354,20 @@ app.get('/networkreportworking', (req, res) => {
     psnr.rtsp_port,
     psnr.rectime,
     psnr.latency,
-    ps.ATMID
+    st.Bank,
+    st.ATMID  -- Use the ATMID from the sites table
 FROM
     port_status_network_report psnr
 JOIN
-    port_status ps ON psnr.site_id = ps.site_sn
+    sites st ON psnr.site_id = st.SN  -- Adjust the join condition
 WHERE
     psnr.latency > 0
     AND DATE(psnr.rectime) = CURRENT_DATE
 GROUP BY
     psnr.site_id
 ORDER BY
-    psnr.site_id ASC
+    psnr.site_id ASC;
+
 
         LIMIT ${recordsPerPage} OFFSET ${offset};
     `;
@@ -384,11 +388,12 @@ ORDER BY
                 psnr.rtsp_port,
                 psnr.rectime,
                 psnr.latency,
-                ps.ATMID
+                st.Bank,
+                st.ATMID  -- Use the ATMID from the sites table
             FROM
                 port_status_network_report psnr
             JOIN
-                port_status ps ON psnr.site_id = ps.site_sn
+                sites st ON psnr.site_id = st.SN  -- Adjust the join condition
             WHERE
                 psnr.latency > 0
                 AND DATE(psnr.rectime) = CURRENT_DATE
@@ -435,7 +440,6 @@ app.get('/networkreportnotworking', (req, res) => {
           AND psnr.rectime = (
             SELECT MAX(rectime)
             FROM port_status_network_report
-            WHERE site_id = psnr.site_id
             AND latency = 0
           )
         GROUP BY psnr.site_id
@@ -450,16 +454,25 @@ app.get('/networkreportnotworking', (req, res) => {
         } else {
             if (!atmid) {
                 const totalCountQuery = `
-                    SELECT COUNT(DISTINCT psnr.site_id) AS totalCount
-                    FROM port_status_network_report psnr
-                    JOIN port_status ps ON psnr.site_id = ps.site_sn
-                    WHERE psnr.latency = 0
-                      AND psnr.rectime = (
-                        SELECT MAX(rectime)
-                        FROM port_status_network_report
-                        WHERE site_id = psnr.site_id
-                        AND latency = 0
-                      );
+                SELECT
+                psnr.site_id,
+                psnr.http_port,
+                psnr.sdk_port,
+                psnr.ai_port,
+                psnr.router_port,
+                psnr.rtsp_port,
+                ps.ATMID
+            FROM port_status_network_report psnr
+            JOIN port_status ps ON psnr.site_id = ps.site_sn
+            WHERE psnr.latency = 0
+              AND psnr.rectime = (
+                SELECT MAX(rectime)
+                FROM port_status_network_report
+                WHERE site_id = psnr.site_id
+                AND latency = 0
+              )
+            GROUP BY psnr.site_id
+            ORDER BY psnr.site_id ASC
                 `;
                 db.query(totalCountQuery, (err, countResult) => {
                     if (err) {
@@ -1855,7 +1868,12 @@ app.get('/ExportAllSites', (req, res) => {
 
     let query = `
     SELECT
+    dh.atmid,
     dh.ip,
+    s.Bank,
+    s.City,
+    s.State,
+    s.Zone,
     dh.cam1,
     dh.cam2,
     dh.cam3,
@@ -1868,17 +1886,12 @@ app.get('/ExportAllSites', (req, res) => {
     CASE
         WHEN dh.login_status = 0 THEN 'working'
         ELSE 'not working'
-    END AS login_status,
-    dh.atmid,
+    END AS login_status, 
     dh.dvrtype,
     DATE_FORMAT(dh.last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
     DATE_FORMAT(dh.recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
     DATE_FORMAT(dh.recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
     DATE_FORMAT(dh.cdate, '%Y-%m-%d %H:%i:%s') AS cdate,
-    s.City,
-    s.State,
-    s.Zone,
-    s.Bank,
     ps.rtsp_port,
     ps.sdk_port,
     ps.router_port,

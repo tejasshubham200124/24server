@@ -86,7 +86,7 @@ const SiteTable= () => {
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
-        XLSX.writeFile(wb, 'Online_Sites.xlsx');
+        XLSX.writeFile(wb, 'SiteTable.xlsx');
     };
 
     const Fallback = () => <tr><td>Loading....</td></tr>;
