@@ -397,7 +397,7 @@ ORDER BY
             GROUP BY
                 psnr.site_id
             ORDER BY
-                psnr.site_id ASC 
+                psnr.site_id ASC
                 `;
                 db.query(totalCountQuery, (err, countResult) => {
                     if (err) {

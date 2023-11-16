@@ -38,6 +38,8 @@ const NetworkWorking = () => {
                 const responseData = response.data.data || [];
                 setPost(responseData);
                 setTotalCount(response.data.totalCount || 0);
+                console.log(post)
+                console.log(totalCount)
             })
             .catch((error) => {
                 console.error('API Error:', error);
