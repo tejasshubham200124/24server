@@ -28,7 +28,7 @@ const NetworkTotalSites = () => {
         let apiUrl = `${process.env.REACT_APP_DVRHEALTH_API_URL}/networkreporttwo?page=${page}`;
 
         if (searchTerm) {
-            apiUrl += `&atmid=${searchTerm}`;
+            apiUrl += `&ATMID=${searchTerm}`;
         }
 
         axios
