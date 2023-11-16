@@ -377,21 +377,23 @@ ORDER BY
             if (!ATMID) {
                 const totalCountQuery = `
                 SELECT
-    COUNT(*) AS totalCount
-FROM (
-    SELECT
-        psnr.site_id
-    FROM
-        port_status_network_report psnr
-    JOIN
-        sites st ON psnr.site_id = st.SN
-    WHERE
-        psnr.latency > 0
-        AND DATE(psnr.rectime) = CURRENT_DATE
-    GROUP BY
-        psnr.site_id
-) AS subquery;
-                `;
+                    COUNT(*) AS totalCount
+                FROM (
+                    SELECT
+                        psnr.site_id
+                    FROM
+                        port_status_network_report psnr
+                    JOIN
+                        sites st ON psnr.site_id = st.SN
+                    WHERE
+                        psnr.latency > 0
+                        AND DATE(psnr.rectime) = CURRENT_DATE
+                        ${ATMID ? `AND st.ATMID = '${ATMID}'` : ''}  -- Include ATMID condition if provided
+                    GROUP BY
+                        psnr.site_id
+                ) AS subquery;
+            `;
+            
                 db.query(totalCountQuery, (err, countResult) => {
                     if (err) {
                         console.error('Error fetching total count of records:', err);
@@ -406,8 +408,6 @@ FROM (
         }
     });
 });
-
-
 
 app.get('/networkreportnotworking', (req, res) => {
     const recordsPerPage = 50;
