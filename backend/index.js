@@ -491,6 +491,7 @@ app.get('/networkreportnotworking', (req, res) => {
     SELECT
     psnr.site_id,
     s.Bank,
+    s.ATMID,
     psnr.http_port,
     psnr.rtsp_port,
     psnr.router_port,
