@@ -405,9 +405,9 @@ app.get('/networkreportworking', (req, res) => {
     const recordsPerPage = 50;
     const page = req.query.page || 1;
     const offset = (page - 1) * recordsPerPage;
-    const ATMID = req.query.ATMID || '';
+    const atmid = req.query.ATMID || '';
 
-    console.log('ATMID:', ATMID)
+    console.log('ATMID:', atmid)
 
     const query = `
     SELECT
@@ -434,8 +434,8 @@ ORDER BY
     psnr.site_id ASC`;
 
 
-    if (ATMID) {
-        query += ` AND st.ATMID LIKE '%${ATMID}%'`;
+    if (atmid) {
+        query += ` AND st.ATMID LIKE '%${atmid}%'`;
     }
 
     query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
@@ -445,7 +445,7 @@ ORDER BY
             console.error('Error fetching network report data:', err);
             res.status(500).json({ error: 'Error fetching network report data' });
         } else {
-            if (!ATMID) {
+            if (!atmid) {
                 const totalCountQuery = `
                 SELECT
                     COUNT(*) AS totalCount
