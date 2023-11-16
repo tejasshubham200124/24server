@@ -342,7 +342,7 @@ app.get('/networkreportworking', (req, res) => {
     const recordsPerPage = 50;
     const page = req.query.page || 1;
     const offset = (page - 1) * recordsPerPage;
-    const atmid = req.query.ATMID || '';
+    const ATMID = req.query.ATMID || '';
 
     const query = `
     SELECT
@@ -374,7 +374,7 @@ ORDER BY
             console.error('Error fetching network report data:', err);
             res.status(500).json({ error: 'Error fetching network report data' });
         } else {
-            if (!atmid) {
+            if (!ATMID) {
                 const totalCountQuery = `
                 SELECT
     COUNT(*) AS totalCount

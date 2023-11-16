@@ -3,7 +3,7 @@ import { Table } from 'react-bootstrap';
 import ReactPaginate from 'react-paginate';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
-import { FiArrowUp, FiArrowDown } from 'react-icons/fi'
+
 
 const NetworkTotalSites = () => {
     const [post, setPost] = useState([]);
