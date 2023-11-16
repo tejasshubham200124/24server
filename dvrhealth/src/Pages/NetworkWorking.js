@@ -28,7 +28,7 @@ const NetworkWorking = () => {
         let apiUrl = `${process.env.REACT_APP_DVRHEALTH_API_URL}/networkreportworking?page=${page}`;
 
         if (searchTerm) {
-            apiUrl += `&atmid=${searchTerm}`;
+            apiUrl += `&ATMID=${searchTerm}`;
         }
 
         axios
@@ -101,7 +101,7 @@ const NetworkWorking = () => {
                 <div>
                     <div className="row">
                         <div className="col-6 pt-2">
-                            <h6>Network Report</h6>
+                            <h6>Network Working Report</h6>
                             <button onClick={exportToExcel} className="btn btn-primary mt-3">
                                 Export to Excel
                             </button>

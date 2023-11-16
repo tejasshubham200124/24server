@@ -342,7 +342,7 @@ app.get('/networkreportworking', (req, res) => {
     const recordsPerPage = 50;
     const page = req.query.page || 1;
     const offset = (page - 1) * recordsPerPage;
-    const atmid = req.query.atmid || '';
+    const atmid = req.query.ATMID || '';
 
     const query = `
     SELECT
