@@ -314,17 +314,20 @@ app.get('/NetworkReportNotWorkingCount', (req, res) => {
     SELECT
     COUNT(*) AS notworking_records
 FROM
-    (
+    port_status_network_report psnr
+JOIN
+    sites s ON psnr.site_id = s.SN
+WHERE
+    (psnr.site_id, psnr.rectime) IN (
         SELECT
-            MAX(rectime) AS max_rectime
+            site_id,
+            MAX(rectime) AS latest_rectime
         FROM
             port_status_network_report
         WHERE
             latency = 0
         GROUP BY
             site_id
-    ) AS subquery;
-    
     `;
 
     db.query(query, (err, result) => {
@@ -525,7 +528,7 @@ WHERE
             if (!atmid) {
                 const totalCountQuery = `
                 SELECT
-    COUNT(*) AS row_count
+    COUNT(*) AS totalCount
 FROM
     port_status_network_report psnr
 JOIN
