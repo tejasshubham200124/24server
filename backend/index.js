@@ -480,29 +480,42 @@ app.get('/networkreportnotworking', (req, res) => {
     const recordsPerPage = 50;
     const page = req.query.page || 1;
     const offset = (page - 1) * recordsPerPage;
-    const atmid = req.query.atmid || '';
+    const atmid = req.query.ATMID || '';
 
-    const query = `
+   let query = `
+    SELECT
+    psnr.site_id,
+    s.Bank,
+    psnr.http_port,
+    psnr.rtsp_port,
+    psnr.router_port,
+    psnr.sdk_port,
+    psnr.ai_port,
+    DATE_FORMAT(psnr.rectime, '%Y-%m-%d %H:%i:%s') AS rectime,
+    psnr.latency
+FROM
+    port_status_network_report psnr
+JOIN
+    sites s ON psnr.site_id = s.SN
+WHERE
+    (psnr.site_id, psnr.rectime) IN (
         SELECT
-            psnr.site_id,
-            psnr.http_port,
-            psnr.sdk_port,
-            psnr.ai_port,
-            psnr.router_port,
-            psnr.rtsp_port,
-            ps.ATMID
-        FROM port_status_network_report psnr
-        JOIN port_status ps ON psnr.site_id = ps.site_sn
-        WHERE psnr.latency = 0
-          AND psnr.rectime = (
-            SELECT MAX(rectime)
-            FROM port_status_network_report
-            AND latency = 0
-          )
-        GROUP BY psnr.site_id
-        ORDER BY psnr.site_id ASC
-        LIMIT ${recordsPerPage} OFFSET ${offset};
+            site_id,
+            MAX(rectime) AS latest_rectime
+        FROM
+            port_status_network_report
+        WHERE
+            latency = 0
+        GROUP BY
+            site_id
+    )
     `;
+
+    if (atmid) {
+        query += ` AND s.ATMID LIKE '%${atmid}%'`;
+    }
+
+    query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
 
     db.query(query, (err, result) => {
         if (err) {
@@ -512,25 +525,23 @@ app.get('/networkreportnotworking', (req, res) => {
             if (!atmid) {
                 const totalCountQuery = `
                 SELECT
-                psnr.site_id,
-                psnr.http_port,
-                psnr.sdk_port,
-                psnr.ai_port,
-                psnr.router_port,
-                psnr.rtsp_port,
-                ps.ATMID
-            FROM port_status_network_report psnr
-            JOIN port_status ps ON psnr.site_id = ps.site_sn
-            WHERE psnr.latency = 0
-              AND psnr.rectime = (
-                SELECT MAX(rectime)
-                FROM port_status_network_report
-                WHERE site_id = psnr.site_id
-                AND latency = 0
-              )
-            GROUP BY psnr.site_id
-            ORDER BY psnr.site_id ASC
-                `;
+    COUNT(*) AS row_count
+FROM
+    port_status_network_report psnr
+JOIN
+    sites s ON psnr.site_id = s.SN
+WHERE
+    (psnr.site_id, psnr.rectime) IN (
+        SELECT
+            site_id,
+            MAX(rectime) AS latest_rectime
+        FROM
+            port_status_network_report
+        WHERE
+            latency = 0
+        GROUP BY
+            site_id
+    );`
                 db.query(totalCountQuery, (err, countResult) => {
                     if (err) {
                         console.error('Error fetching total count of records:', err);
@@ -547,35 +558,35 @@ app.get('/networkreportnotworking', (req, res) => {
 });
 
 
-app.get('/networkreport', (req, res) => {
-    const query = `
-    SELECT
-    psnr.site_id,
-    psnr.http_port,
-    psnr.sdk_port,
-    psnr.ai_port,
-    psnr.router_port,
-    psnr.rtsp_port,
-    ps.atmid
-FROM port_status_network_report psnr
-JOIN (
-    SELECT site_id, MAX(rectime) AS latest_rectime
-    FROM port_status_network_report
-    GROUP BY site_id
-) AS latest_status
-ON psnr.site_id = latest_status.site_id AND psnr.rectime = latest_status.latest_rectime
-JOIN port_status ps ON psnr.site_id = ps.site_sn
-    `;
+// app.get('/networkreport', (req, res) => {
+//     const query = `
+//     SELECT
+//     psnr.site_id,
+//     psnr.http_port,
+//     psnr.sdk_port,
+//     psnr.ai_port,
+//     psnr.router_port,
+//     psnr.rtsp_port,
+//     ps.atmid
+// FROM port_status_network_report psnr
+// JOIN (
+//     SELECT site_id, MAX(rectime) AS latest_rectime
+//     FROM port_status_network_report
+//     GROUP BY site_id
+// ) AS latest_status
+// ON psnr.site_id = latest_status.site_id AND psnr.rectime = latest_status.latest_rectime
+// JOIN port_status ps ON psnr.site_id = ps.site_sn
+//     `;
 
-    db.query(query, (err, result) => {
-        if (err) {
-            console.error('Error fetching DVR health data:', err);
-            res.status(500).json({ error: 'Error fetching DVR health data' });
-        } else {
-            res.status(200).json(result);
-        }
-    });
-});
+//     db.query(query, (err, result) => {
+//         if (err) {
+//             console.error('Error fetching DVR health data:', err);
+//             res.status(500).json({ error: 'Error fetching DVR health data' });
+//         } else {
+//             res.status(200).json(result);
+//         }
+//     });
+// });
 
 
 app.get('/networkreporttwo', (req, res) => {

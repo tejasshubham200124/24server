@@ -28,7 +28,7 @@ const NetworkNotWorking = () => {
         let apiUrl = `${process.env.REACT_APP_DVRHEALTH_API_URL}/networkreportnotworking?page=${page}`;
 
         if (searchTerm) {
-            apiUrl += `&atmid=${searchTerm}`;
+            apiUrl += `&ATMID=${searchTerm}`;
         }
 
         axios
