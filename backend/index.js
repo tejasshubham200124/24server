@@ -311,23 +311,24 @@ FROM (
 
 app.get('/NetworkReportNotWorkingCount', (req, res) => {
     const query = `
-    SELECT
-    COUNT(*) AS notworking_records
-FROM
-    port_status_network_report psnr
-JOIN
-    sites s ON psnr.site_id = s.SN
-WHERE
-    (psnr.site_id, psnr.rectime) IN (
         SELECT
-            site_id,
-            MAX(rectime) AS latest_rectime
+            COUNT(*) AS notworking_records
         FROM
-            port_status_network_report
+            port_status_network_report psnr
+        JOIN
+            sites s ON psnr.site_id = s.SN
         WHERE
-            latency = 0
-        GROUP BY
-            site_id
+            (psnr.site_id, psnr.rectime) IN (
+                SELECT
+                    site_id,
+                    MAX(rectime) AS latest_rectime
+                FROM
+                    port_status_network_report
+                WHERE
+                    latency = 0
+                GROUP BY
+                    site_id
+            )
     `;
 
     db.query(query, (err, result) => {
@@ -336,11 +337,12 @@ WHERE
             res.status(500).json({ error: 'Error counting offline entries' });
         } else {
             const { notworking_records } = result[0];
-
             res.status(200).json({ notworking_records });
         }
     });
 });
+
+
 
 app.get('/OnlineSiteDetails', (req, res) => {
     const page = req.query.page || 1;
