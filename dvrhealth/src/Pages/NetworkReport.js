@@ -82,7 +82,7 @@ const NetworkReport = () => {
                             <div class="d-flex align-items-center mt-2">
                                 <div>
                                     <p class="mb-0 text-secondary">Not Working</p>
-                                    <Link to='/admin/NetworNotkWorking' style={{ textDecoration: 'none' }}> <h4 class="my-1 text-info">{networNotkWorking}</h4></Link>
+                                    <Link to='/admin/NetworkNotWorking' style={{ textDecoration: 'none' }}> <h4 class="my-1 text-info">{networNotkWorking}</h4></Link>
                                 </div>
                                 <div class="widgets-icons-2 rounded-circle bg-gradient-blooker5 text-white ms-auto"><BiWifiOff  />
                                 </div>
