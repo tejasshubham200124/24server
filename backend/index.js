@@ -525,8 +525,7 @@ WHERE
         GROUP BY
             site_id
     )
-    AND DATE(psnr.rectime) = CURDATE();
-
+    AND DATE(psnr.rectime) = CURDATE()
     `;
 
     if (atmid) {
