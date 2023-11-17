@@ -311,24 +311,33 @@ FROM (
 
 app.get('/NetworkReportNotWorkingCount', (req, res) => {
     const query = `
-        SELECT
-            COUNT(*) AS notworking_records
-        FROM
-            port_status_network_report psnr
-        JOIN
-            sites s ON psnr.site_id = s.SN
-        WHERE
-            (psnr.site_id, psnr.rectime) IN (
-                SELECT
-                    site_id,
-                    MAX(rectime) AS latest_rectime
-                FROM
-                    port_status_network_report
-                WHERE
-                    latency = 0
-                GROUP BY
-                    site_id
-            )
+    SELECT
+    COUNT(*) AS notworking_records
+FROM (
+    SELECT
+        psnr.site_id
+    FROM
+        port_status_network_report psnr
+    JOIN
+        sites st ON psnr.site_id = st.SN
+    WHERE
+        psnr.latency = 0
+        AND (psnr.site_id, psnr.rectime) IN (
+            SELECT
+                site_id,
+                MAX(rectime) AS latest_rectime
+            FROM
+                port_status_network_report
+            WHERE
+                latency = 0 AND DATE(rectime) = CURDATE()
+            GROUP BY
+                site_id
+        )
+        AND DATE(psnr.rectime) = CURDATE()
+    GROUP BY
+        psnr.site_id
+) AS subquery;
+
     `;
 
     db.query(query, (err, result) => {
@@ -488,7 +497,7 @@ app.get('/networkreportnotworking', (req, res) => {
     const atmid = req.query.ATMID || '';
 
    let query = `
-    SELECT
+   SELECT
     psnr.site_id,
     s.Bank,
     s.ATMID,
@@ -504,17 +513,20 @@ FROM
 JOIN
     sites s ON psnr.site_id = s.SN
 WHERE
-    (psnr.site_id, psnr.rectime) IN (
+    psnr.latency = 0
+    AND (psnr.site_id, psnr.rectime) IN (
         SELECT
             site_id,
             MAX(rectime) AS latest_rectime
         FROM
             port_status_network_report
         WHERE
-            latency = 0
+            latency = 0 AND DATE(rectime) = CURDATE()
         GROUP BY
             site_id
     )
+    AND DATE(psnr.rectime) = CURDATE();
+
     `;
 
     if (atmid) {
@@ -531,23 +543,31 @@ WHERE
             if (!atmid) {
                 const totalCountQuery = `
                 SELECT
-    COUNT(*) AS totalCount
-FROM
-    port_status_network_report psnr
-JOIN
-    sites s ON psnr.site_id = s.SN
-WHERE
-    (psnr.site_id, psnr.rectime) IN (
-        SELECT
-            site_id,
-            MAX(rectime) AS latest_rectime
-        FROM
-            port_status_network_report
-        WHERE
-            latency = 0
-        GROUP BY
-            site_id
-    );`
+                COUNT(*) AS totalCount
+            FROM (
+                SELECT
+                    psnr.site_id
+                FROM
+                    port_status_network_report psnr
+                JOIN
+                    sites st ON psnr.site_id = st.SN
+                WHERE
+                    psnr.latency = 0
+                    AND (psnr.site_id, psnr.rectime) IN (
+                        SELECT
+                            site_id,
+                            MAX(rectime) AS latest_rectime
+                        FROM
+                            port_status_network_report
+                        WHERE
+                            latency = 0 AND DATE(rectime) = CURDATE()
+                        GROUP BY
+                            site_id
+                    )
+                    AND DATE(psnr.rectime) = CURDATE()
+                GROUP BY
+                    psnr.site_id
+            ) AS subquery;`
                 db.query(totalCountQuery, (err, countResult) => {
                     if (err) {
                         console.error('Error fetching total count of records:', err);
