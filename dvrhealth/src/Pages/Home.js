@@ -8,7 +8,7 @@ import { BiDisc } from 'react-icons/bi'
 import Tables from './Tables';
 import { Link } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
-import axios from 'react'
+import axios from 'axios';
 
 const Home = () => {
 
@@ -18,7 +18,7 @@ const Home = () => {
   const [hddNotWorking, sethddNotWorking] = useState(0);
   const [neveron, setNeveron] = useState(0);
   const [showModal, setShowModal] = useState(false);
-  const [hddcalllog, sethddcalllog] = useState([])
+  const [hddcalllog, setHddCallLog] = useState([]);
 
   const handleOpenModal = () => {
     setShowModal(true);
@@ -84,17 +84,21 @@ const Home = () => {
 
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/todayshddstatuschange`);
-        sethddcalllog(response.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
+    const fetchData = () => {
+      axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/todayshddstatuschange`)
+        .then((response) => {
+          console.log('Data from API:', response.data);
+          setHddCallLog(response.data);
+        })
+        .catch((error) => {
+          console.error('Error fetching data:', error);
+        });
     };
 
     fetchData();
   }, []);
+
+  // console.log('State after useEffect:', hddcalllog);
 
   return (
     <div>
@@ -186,9 +190,15 @@ const Home = () => {
                         <Modal.Body>
                           <ul>
                             {hddcalllog.map((item) => (
-                              <li key={item.atmid}>
-                                {`ATM ID: ${item.atmid}, Previous Status: ${item.previous_status}, Current Status: ${item.current_status}`}
+                              <li key={item.atmid} style={{ fontWeight: 600, color: 'black' }}>
+                                {`ATM ID: `}
+                                <span style={{ fontWeight: 600, color: 'darkslateblue' }}>{item.atmid}</span>
+                                {`, Previous Status: `}
+                                <span style={{ fontWeight: 600, color: 'green' }}>{item.previous_status}</span>
+                                {`, Current Status: `}
+                                <span style={{ fontWeight: 600, color: 'red' }}>{item.current_status}</span>
                               </li>
+
                             ))}
                           </ul>
                         </Modal.Body>

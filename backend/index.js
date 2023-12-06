@@ -741,6 +741,7 @@ WHERE DATE(dh2.last_communication) = CURDATE()
             res.status(500).json({ error: 'Error fetching DVR history data' });
         } else {
             res.status(200).json(result);
+            console.log(result)
         }
     });
 });
