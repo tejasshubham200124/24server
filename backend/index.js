@@ -431,7 +431,7 @@ app.get('/networkreportworking', (req, res) => {
     psnr.ai_port,
     psnr.router_port,
     psnr.rtsp_port,
-    DATE_FORMAT(psnr.rectime, '%Y-%m-%d %H:%i:%s') AS rectime,
+    DATE_FORMAT(MAX(psnr.rectime), '%Y-%m-%d %H:%i:%s') AS rectime,
     psnr.latency,
     st.Bank,
     st.ATMID  
@@ -496,7 +496,7 @@ app.get('/networkreportnotworking', (req, res) => {
     const offset = (page - 1) * recordsPerPage;
     const atmid = req.query.ATMID || '';
 
-   let query = `
+    let query = `
    SELECT
     psnr.site_id,
     s.Bank,
@@ -714,6 +714,26 @@ WHERE
     AND s.live = 'Y';
 
 
+    `;
+    db.query(query, (err, result) => {
+        if (err) {
+            console.error('Error fetching DVR history data:', err);
+            res.status(500).json({ error: 'Error fetching DVR history data' });
+        } else {
+            res.status(200).json(result);
+        }
+    });
+});
+
+
+app.get('/todayshddstatuschange', (req, res) => {
+    const query = `
+    SELECT DISTINCT dh.atmid, dh2.hdd AS previous_status, dh.hdd AS current_status
+FROM dvr_health dh
+JOIN dvr_history dh2 ON dh.atmid = dh2.atmid
+WHERE DATE(dh2.last_communication) = CURDATE()
+  AND UPPER(dh2.hdd) = 'OK' 
+  AND dh.hdd <> 'OK'       
     `;
     db.query(query, (err, result) => {
         if (err) {
@@ -1046,7 +1066,6 @@ app.get('/hddcalllog', (req, res) => {
         }
     });
 });
-
 
 
 
@@ -1408,7 +1427,7 @@ app.get('/OfflineSiteDetails', (req, res) => {
             AND s.live = 'Y'`;
 
     if (atmid) {
-        query += ` AND dh.atmid LIKE '%${atmid}%'`;
+        query += ` WHERE LOWER(dh.atmid) LIKE '%${atmid.toLowerCase()}%'`;
     }
 
     query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;

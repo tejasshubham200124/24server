@@ -7,6 +7,8 @@ import { CgDanger } from 'react-icons/cg'
 import { BiDisc } from 'react-icons/bi'
 import Tables from './Tables';
 import { Link } from 'react-router-dom';
+import { Modal, Button } from 'react-bootstrap';
+import axios from 'react'
 
 const Home = () => {
 
@@ -15,7 +17,16 @@ const Home = () => {
   const [offlineSites, setOfflineSites] = useState(0);
   const [hddNotWorking, sethddNotWorking] = useState(0);
   const [neveron, setNeveron] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [hddcalllog, sethddcalllog] = useState([])
 
+  const handleOpenModal = () => {
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
 
   const cardStyle = {
     width: 320,
@@ -70,6 +81,21 @@ const Home = () => {
       .then(data => setNeveron(data.neveron))
       .catch(error => console.error('Error fetching number of offline sites:', error));
   }, []);
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/todayshddstatuschange`);
+        sethddcalllog(response.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div>
       <div className='dashboard' >
@@ -142,11 +168,42 @@ const Home = () => {
                   <div>
                     <p class="mb-0 text-secondary">HDD</p>
                     <Link to='/admin/HddNotWorking' style={{ textDecoration: 'none' }}>   <h4 class="my-1 hddsi">{hddNotWorking}</h4></Link>
-                    <Link to='/admin/FormattedData' style={{ textDecoration: 'none' }}>  <p style={{ color: 'red', fontWeight: 'bold' }} className='mt-2'>See Formatted Data</p></Link>
+                    <div className='d-flex flex-row align-items-center justify-content-center'>
+                      <Link to='/admin/FormattedData' style={{ textDecoration: 'none' }}>  <p style={{ color: 'red', fontWeight: 'bold' }} >See Formatted Data</p></Link>
+
+                      <p
+                        className='ml-3'
+                        style={{ color: 'red', fontWeight: 'bold', cursor: 'pointer' }}
+                        onClick={handleOpenModal}
+                      >
+                        call log
+                      </p>
+
+                      <Modal show={showModal} onHide={handleCloseModal}>
+                        <Modal.Header closeButton>
+                          <Modal.Title>HDD Call Log </Modal.Title>
+                        </Modal.Header>
+                        <Modal.Body>
+                          <ul>
+                            {hddcalllog.map((item) => (
+                              <li key={item.atmid}>
+                                {`ATM ID: ${item.atmid}, Previous Status: ${item.previous_status}, Current Status: ${item.current_status}`}
+                              </li>
+                            ))}
+                          </ul>
+                        </Modal.Body>
+                        <Modal.Footer>
+                          <Button variant="secondary" onClick={handleCloseModal}>
+                            Close
+                          </Button>
+                        </Modal.Footer>
+                      </Modal>
+                    </div>
                   </div>
-                  <div class="widgets-icons-2 rounded-circle bg-gradient-blooker3 text-white ms-auto"><BiDisc />
+                  <div class="widgets-icons-2 rounded-circle bg-gradient-blooker3 text-white ms-auto mb-5"><BiDisc />
                   </div>
                 </div>
+
               </Card>
             </Col>
           </Row>
