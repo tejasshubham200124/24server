@@ -9,6 +9,7 @@ import Tables from './Tables';
 import { Link } from 'react-router-dom';
 import { Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
+import { Table } from 'react-bootstrap';
 
 const Home = () => {
 
@@ -188,19 +189,24 @@ const Home = () => {
                           <Modal.Title>HDD Call Log </Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
-                          <ul>
-                            {hddcalllog.map((item) => (
-                              <li key={item.atmid} style={{ fontWeight: 600, color: 'black' }}>
-                                {`ATM ID: `}
-                                <span style={{ fontWeight: 600, color: 'darkslateblue' }}>{item.atmid}</span>
-                                {`, Previous Status: `}
-                                <span style={{ fontWeight: 600, color: 'green' }}>{item.previous_status}</span>
-                                {`, Current Status: `}
-                                <span style={{ fontWeight: 600, color: 'red' }}>{item.current_status}</span>
-                              </li>
-
-                            ))}
-                          </ul>
+                          <Table striped bordered hover>
+                            <thead>
+                              <tr>
+                                <th>ATM ID</th>
+                                <th>Previous Status</th>
+                                <th>Current Status</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {hddcalllog.map((item) => (
+                                <tr key={item.atmid}>
+                                  <td style={{ color: 'darkblue', fontWeight: 'bold', fontSize: '13px' }} >{item.atmid}</td>
+                                  <td style={{ color: 'green', fontWeight: 'bold', fontSize: '13px' }}>{item.previous_status}</td>
+                                  <td  style={{ color: 'red', fontWeight: 'bold', fontSize: '13px' }}>{item.current_status}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </Table>
                         </Modal.Body>
                         <Modal.Footer>
                           <Button variant="secondary" onClick={handleCloseModal}>
