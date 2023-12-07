@@ -33,6 +33,7 @@ const DeviceHistory = () => {
     const [postPerPage] = useState(100);
     const [loading, setLoading] = useState(true);
     const [totalCount, setTotalCount] = useState(0);
+    const [data, setData] = useState([]);
     const { atmId } = useParams();
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
@@ -128,7 +129,7 @@ const DeviceHistory = () => {
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
-        XLSX.writeFile(wb, 'SiteTable.xlsx');
+        XLSX.writeFile(wb, 'DeviceHistory.xlsx');
     };
 
     return (
