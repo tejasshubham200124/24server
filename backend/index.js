@@ -1562,13 +1562,13 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
               ELSE 'not working'
           END AS login_status,
           DATE_FORMAT(last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
-          DATE_FORMAT(recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
-          DATE_FORMAT(recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
           DATE_FORMAT(cdate, '%Y-%m-%d %H:%i:%s') AS cdate
       FROM 
           dvr_history 
       WHERE 
-          atmid = ?`;
+          atmid = ?
+          ORDER BY 
+    last_communication DESC`;
 
     if (formattedStartDate && formattedEndDate) {
         query += ` AND last_communication between  ? AND  ?`;
@@ -2163,8 +2163,6 @@ app.get('/DeviceHistoryExport', (req, res) => {
         ELSE 'not working'
     END AS login_status, /* Corrected alias name here */
     DATE_FORMAT(last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
-    DATE_FORMAT(recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
-    DATE_FORMAT(recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
     DATE_FORMAT(cdate, '%Y-%m-%d %H:%i:%s') AS cdate
     FROM 
     dvr_history 

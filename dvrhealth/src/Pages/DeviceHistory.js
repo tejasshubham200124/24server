@@ -109,25 +109,27 @@ const DeviceHistory = () => {
     };
 
 
-    const exportToExcel = async () => {
-        try {
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/DeviceHistoryExport`);
+                setData(response.data.data);
+            } catch (error) {
+                console.error('Error fetching data from API:', error);
+            }
+            setLoading(false);
+        };
 
-            const response = await axios.get`${process.env.REACT_APP_DVRHEALTH_API_URL}/DeviceHistoryExport`;
-            const data = response.data.data;
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-            const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-            const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            const dataUrl = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = dataUrl;
-            link.download = 'DeviceHistory.xlsx';
-            link.click();
-        } catch (error) {
-            console.error('Error exporting to Excel:', error);
-        }
-    }
+        fetchData();
+    }, []);
+
+    const exportToExcel = () => {
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
+        XLSX.writeFile(wb, 'SiteTable.xlsx');
+    };
 
     return (
         <div>
