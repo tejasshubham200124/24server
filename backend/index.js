@@ -2103,25 +2103,32 @@ WHERE
 
 
 app.get('/DeviceHistoryExport', (req, res) => {
+    const atmId = req.query.atmId;
+
+    if (!atmId) {
+        return res.status(400).json({ error: 'atmId is required for exporting data' });
+    }
+
     const query = `
-    SELECT 
-    *,
-    CASE 
-        WHEN hdd = 'ok' THEN 'working'
-        ELSE 'not working'
-    END AS hdd_status,
-    CASE 
-        WHEN login_status = 0 THEN 'working'
-        ELSE 'not working'
-    END AS login_status, /* Corrected alias name here */
-    DATE_FORMAT(last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
-    DATE_FORMAT(cdate, '%Y-%m-%d %H:%i:%s') AS cdate
-    FROM 
-    dvr_history 
-    
+        SELECT 
+            *,
+            CASE 
+                WHEN hdd = 'ok' THEN 'working'
+                ELSE 'not working'
+            END AS hdd_status,
+            CASE 
+                WHEN login_status = 0 THEN 'working'
+                ELSE 'not working'
+            END AS login_status,
+            DATE_FORMAT(last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+            DATE_FORMAT(cdate, '%Y-%m-%d %H:%i:%s') AS cdate
+        FROM 
+            dvr_history
+        WHERE 
+            atmid = ?;
     `;
 
-    db.query(query, (err, result) => {
+    db.query(query, [atmId], (err, result) => {
         if (err) {
             console.error('Error fetching DVR health data for export:', err);
             res.status(500).json({ error: 'Error fetching DVR health data for export' });
@@ -2130,6 +2137,7 @@ app.get('/DeviceHistoryExport', (req, res) => {
         }
     });
 });
+
 
 
 app.post('/login', (req, res) => {

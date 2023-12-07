@@ -98,29 +98,26 @@ const DeviceHistory = () => {
         fetchData(newPageNumber, startDate, endDate);
     };
 
-
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/DeviceHistoryExport`);
-                setData(response.data.data);
-                console.log(response.data)
-            } catch (error) {
-                console.error('Error fetching data from API:', error);
-            }
+    const exportToExcel = async (atmId) => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/DeviceHistoryExport?atmId=${atmId}`);
+            setData(response.data.data);
+            generateExcelFile();
+        } catch (error) {
+            console.error('Error fetching data from API:', error);
             setLoading(false);
-        };
+        }
+    };
+    
 
-        fetchData();
-    }, []);
-
-    // const exportToExcel = () => {
-    //     const ws = XLSX.utils.json_to_sheet(data);
-    //     const wb = XLSX.utils.book_new();
-    //     XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
-    //     XLSX.writeFile(wb, 'SiteTable.xlsx');
-    // };
+    const generateExcelFile = () => {
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
+        XLSX.writeFile(wb, 'DeviceHistory.xlsx');
+        setLoading(false);
+    };
 
     return (
         <div>
@@ -152,9 +149,9 @@ const DeviceHistory = () => {
                                 />
                             </div>
                         </div>
-                        {/* <button onClick={exportToExcel} className="btn btn-primary ">
+                        <button onClick={exportToExcel} className="btn btn-primary ">
                             Export to Excel
-                        </button> */}
+                        </button>
 
                     </div>
 
