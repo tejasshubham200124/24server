@@ -1567,8 +1567,9 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
           dvr_history 
       WHERE 
           atmid = ?
-          ORDER BY 
-    last_communication DESC`;
+    //       ORDER BY 
+    // last_communication DESC
+    `;
 
     if (formattedStartDate && formattedEndDate) {
         query += ` AND last_communication between  ? AND  ?`;
@@ -2175,6 +2176,7 @@ app.get('/DeviceHistoryExport', (req, res) => {
             res.status(500).json({ error: 'Error fetching DVR health data for export' });
         } else {
             res.status(200).json({ data: result });
+            console.log(result)
         }
     });
 });

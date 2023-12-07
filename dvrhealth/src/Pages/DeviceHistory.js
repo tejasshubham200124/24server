@@ -43,25 +43,6 @@ const DeviceHistory = () => {
         const apiUrl = process.env.REACT_APP_DVRHEALTH_API_URL;
         const postPerPage = 100;
 
-        // const formattedStartDate = startDate
-        //     ? startDate.toISOString().slice(0, 19).replace('T', ' ')
-        //     : null;
-
-        // const formattedEndDate = endDate
-        //     ? new Date(endDate.getTime() + 24 * 60 * 60 * 1000)
-        //         .toISOString()
-        //         .slice(0, 19)
-        //         .replace('T', ' ')
-        //     : null;
-
-    //     const formattedStartDate = startDate
-    //     ? new Date(startDate).toISOString().slice(0, 19).replace('T', ' ')
-    //     : null;
-      
-    //   const formattedEndDate = endDate
-    //     ? new Date(endDate).toISOString().slice(0, 19).replace('T', ' ')
-    //     : null;
-      
 
     console.log(
     formatDate(startDate)
@@ -70,9 +51,7 @@ const DeviceHistory = () => {
         formatDate(endDate)
 
     )
-      
-
-
+    
         let apiUrlWithEndpoint = `${apiUrl}/devicehistoryThree/${atmId}?page=${pageNumber}&recordsPerPage=${postPerPage}`;
 
         if (startDate && endDate) {
