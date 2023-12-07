@@ -177,48 +177,6 @@ app.get('/RecNotAvailableDetails', (req, res) => {
 });
 
 
-
-
-
-
-
-app.get('/devicehistory/:atmId', (req, res) => {
-    const atmId = req.params.atmId;
-
-    db.query(`
-    SELECT 
-    *,
-    CASE 
-        WHEN hdd = 'ok' THEN 'working'
-        ELSE 'not working'
-    END AS hdd_status,
-    CASE 
-        WHEN login_status = 0 THEN 'working'
-        ELSE 'not working'
-    END AS login_status_status,
-    DATE_FORMAT(last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
-    DATE_FORMAT(recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
-    DATE_FORMAT(recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
-    DATE_FORMAT(cdate, '%Y-%m-%d %H:%i:%s') AS cdate
-FROM 
-    dvr_history 
-WHERE 
-    atmid = ?
-ORDER BY last_communication DESC;`, [atmId], (err, result) => {
-        if (err) {
-            console.error('Error fetching history data for ATM ID:', err);
-            res.status(500).json({ error: 'Error fetching history data' });
-        } else {
-            res.status(200).json(result);
-        }
-    });
-
-});
-
-
-
-
-
 app.get('/OnlineSites', (req, res) => {
     const query = `
         SELECT COUNT(*) AS online_count
@@ -1567,9 +1525,8 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
           dvr_history 
       WHERE 
           atmid = ?
-    //       ORDER BY 
-    // last_communication DESC
-    `;
+          ORDER BY 
+    last_communication DESC`;
 
     if (formattedStartDate && formattedEndDate) {
         query += ` AND last_communication between  ? AND  ?`;
@@ -1605,12 +1562,6 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
         }
     });
 });
-
-
-
-
-
-
 
 app.get('/AllSites', (req, res) => {
     const recordsPerPage = 50;
@@ -2176,7 +2127,6 @@ app.get('/DeviceHistoryExport', (req, res) => {
             res.status(500).json({ error: 'Error fetching DVR health data for export' });
         } else {
             res.status(200).json({ data: result });
-            console.log(result)
         }
     });
 });

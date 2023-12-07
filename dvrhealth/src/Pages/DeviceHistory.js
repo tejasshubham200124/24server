@@ -15,25 +15,25 @@ const DeviceHistory = () => {
     function formatDate(inputDate) {
         // Parse the input date string
         const dateObj = new Date(inputDate);
-      
+
         // Extract year, month, and day components
         const year = dateObj.getFullYear();
         const month = String(dateObj.getMonth() + 1).padStart(2, '0');
         const day = String(dateObj.getDate()).padStart(2, '0');
-      
+
         // Format the date in the desired format
         const formattedDate = `${year}-${month}-${day}`;
-      
+
         return formattedDate;
-      }
-      
-      
+    }
+
+
     const [post, setPost] = useState([]);
     const [number, setNumber] = useState(1);
     const [postPerPage] = useState(100);
     const [loading, setLoading] = useState(true);
     const [totalCount, setTotalCount] = useState(0);
-    const [data, setData] = useState([]);
+    const [data, setData] = useState([])
     const { atmId } = useParams();
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
@@ -43,15 +43,25 @@ const DeviceHistory = () => {
         const apiUrl = process.env.REACT_APP_DVRHEALTH_API_URL;
         const postPerPage = 100;
 
+        // const formattedStartDate = startDate
+        //     ? startDate.toISOString().slice(0, 19).replace('T', ' ')
+        //     : null;
 
-    console.log(
-    formatDate(startDate)
-    ) 
-    console.log(
-        formatDate(endDate)
+        // const formattedEndDate = endDate
+        //     ? new Date(endDate.getTime() + 24 * 60 * 60 * 1000)
+        //         .toISOString()
+        //         .slice(0, 19)
+        //         .replace('T', ' ')
+        //     : null;
 
-    )
-    
+        //     const formattedStartDate = startDate
+        //     ? new Date(startDate).toISOString().slice(0, 19).replace('T', ' ')
+        //     : null;
+
+        //   const formattedEndDate = endDate
+        //     ? new Date(endDate).toISOString().slice(0, 19).replace('T', ' ')
+        //     : null;
+
         let apiUrlWithEndpoint = `${apiUrl}/devicehistoryThree/${atmId}?page=${pageNumber}&recordsPerPage=${postPerPage}`;
 
         if (startDate && endDate) {
@@ -95,6 +105,7 @@ const DeviceHistory = () => {
             try {
                 const response = await axios.get(`${process.env.REACT_APP_DVRHEALTH_API_URL}/DeviceHistoryExport`);
                 setData(response.data.data);
+                console.log(response.data)
             } catch (error) {
                 console.error('Error fetching data from API:', error);
             }
@@ -108,7 +119,7 @@ const DeviceHistory = () => {
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
-        XLSX.writeFile(wb, 'DeviceHistory.xlsx');
+        XLSX.writeFile(wb, 'SiteTable.xlsx');
     };
 
     return (
