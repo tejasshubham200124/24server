@@ -1569,11 +1569,18 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
           atmid = ?
          `;
 
-    if (formattedStartDate && formattedEndDate) {
-        query += ` AND last_communication between  ? AND  ?`;
-    }
+    // if (formattedStartDate && formattedEndDate) {
+    //     query += ` AND last_communication between  ? AND  ?`;
+    // }
 
-    query += ` ORDER BY last_communication ASC`;
+    // query += ` ORDER BY last_communication ASC`;
+
+    if (formattedStartDate && formattedEndDate) {
+        query += ` AND last_communication BETWEEN ? AND ?`;
+        query += ` ORDER BY last_communication DESC`;  // Latest filtered data at the top
+    } else {
+        query += ` ORDER BY last_communication DESC`;  // Latest data at the top without filtering
+    }
 
     const totalCountQuery = `
       SELECT COUNT(*) AS totalCount
