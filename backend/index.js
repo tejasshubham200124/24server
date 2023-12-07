@@ -177,6 +177,48 @@ app.get('/RecNotAvailableDetails', (req, res) => {
 });
 
 
+
+
+
+
+
+app.get('/devicehistory/:atmId', (req, res) => {
+    const atmId = req.params.atmId;
+
+    db.query(`
+    SELECT 
+    *,
+    CASE 
+        WHEN hdd = 'ok' THEN 'working'
+        ELSE 'not working'
+    END AS hdd_status,
+    CASE 
+        WHEN login_status = 0 THEN 'working'
+        ELSE 'not working'
+    END AS login_status_status,
+    DATE_FORMAT(last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+    DATE_FORMAT(recording_from, '%Y-%m-%d %H:%i:%s') AS recording_from,
+    DATE_FORMAT(recording_to, '%Y-%m-%d %H:%i:%s') AS recording_to,
+    DATE_FORMAT(cdate, '%Y-%m-%d %H:%i:%s') AS cdate
+FROM 
+    dvr_history 
+WHERE 
+    atmid = ?
+ORDER BY last_communication DESC;`, [atmId], (err, result) => {
+        if (err) {
+            console.error('Error fetching history data for ATM ID:', err);
+            res.status(500).json({ error: 'Error fetching history data' });
+        } else {
+            res.status(200).json(result);
+        }
+    });
+
+});
+
+
+
+
+
 app.get('/OnlineSites', (req, res) => {
     const query = `
         SELECT COUNT(*) AS online_count
@@ -1504,6 +1546,7 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
     console.log('Received startDate:', startDate);
     console.log('Received endDate:', endDate);
 
+
     const formattedStartDate = startDate ? formatDate(startDate) + ' 00:00:00' : null;
     const formattedEndDate = endDate ? formatDate(endDate) + ' 23:59:59' : null;
 
@@ -1523,13 +1566,15 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
       FROM 
           dvr_history 
       WHERE 
-          atmid = ?`;
+          atmid = ?
+          ORDER BY 
+    last_communication DESC`;
 
     if (formattedStartDate && formattedEndDate) {
-        query += ` AND last_communication BETWEEN ? AND ?`;
+        query += ` AND last_communication between  ? AND  ?`;
     }
 
-    query += ` ORDER BY last_communication DESC LIMIT ? OFFSET ?`;
+    query += ` ORDER BY last_communication ASC`;
 
     const totalCountQuery = `
       SELECT COUNT(*) AS totalCount
@@ -1543,9 +1588,12 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
             res.status(500).json({ error: 'Error fetching total count of records' });
         } else {
             const totalCount = countResult[0].totalCount;
+
             const offset = (page - 1) * recordsPerPage;
 
-            db.query(query, [atmId, formattedStartDate, formattedEndDate, recordsPerPage, offset], (err, result) => {
+            query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
+
+            db.query(query, [atmId, formattedStartDate, formattedEndDate], (err, result) => {
                 if (err) {
                     console.error('Error fetching history data for ATM ID:', err);
                     res.status(500).json({ error: 'Error fetching history data' });
@@ -1556,6 +1604,11 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
         }
     });
 });
+
+
+
+
+
 
 
 app.get('/AllSites', (req, res) => {
@@ -2098,32 +2151,25 @@ WHERE
 
 
 app.get('/DeviceHistoryExport', (req, res) => {
-    const atmId = req.query.atmId;
-
-    if (!atmId) {
-        return res.status(400).json({ error: 'atmId is required for exporting data' });
-    }
-
     const query = `
-        SELECT 
-            *,
-            CASE 
-                WHEN hdd = 'ok' THEN 'working'
-                ELSE 'not working'
-            END AS hdd_status,
-            CASE 
-                WHEN login_status = 0 THEN 'working'
-                ELSE 'not working'
-            END AS login_status,
-            DATE_FORMAT(last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
-            DATE_FORMAT(cdate, '%Y-%m-%d %H:%i:%s') AS cdate
-        FROM 
-            dvr_history
-        WHERE 
-            atmid = ?;
+    SELECT 
+    *,
+    CASE 
+        WHEN hdd = 'ok' THEN 'working'
+        ELSE 'not working'
+    END AS hdd_status,
+    CASE 
+        WHEN login_status = 0 THEN 'working'
+        ELSE 'not working'
+    END AS login_status, /* Corrected alias name here */
+    DATE_FORMAT(last_communication, '%Y-%m-%d %H:%i:%s') AS last_communication,
+    DATE_FORMAT(cdate, '%Y-%m-%d %H:%i:%s') AS cdate
+    FROM 
+    dvr_history 
+    
     `;
 
-    db.query(query, [atmId], (err, result) => {
+    db.query(query, (err, result) => {
         if (err) {
             console.error('Error fetching DVR health data for export:', err);
             res.status(500).json({ error: 'Error fetching DVR health data for export' });
@@ -2132,7 +2178,6 @@ app.get('/DeviceHistoryExport', (req, res) => {
         }
     });
 });
-
 
 
 app.post('/login', (req, res) => {
