@@ -115,12 +115,12 @@ const DeviceHistory = () => {
         fetchData();
     }, []);
 
-    const exportToExcel = () => {
-        const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
-        XLSX.writeFile(wb, 'SiteTable.xlsx');
-    };
+    // const exportToExcel = () => {
+    //     const ws = XLSX.utils.json_to_sheet(data);
+    //     const wb = XLSX.utils.book_new();
+    //     XLSX.utils.book_append_sheet(wb, ws, 'DVR Health Data');
+    //     XLSX.writeFile(wb, 'SiteTable.xlsx');
+    // };
 
     return (
         <div>
@@ -152,9 +152,9 @@ const DeviceHistory = () => {
                                 />
                             </div>
                         </div>
-                        <button onClick={exportToExcel} className="btn btn-primary ">
+                        {/* <button onClick={exportToExcel} className="btn btn-primary ">
                             Export to Excel
-                        </button>
+                        </button> */}
 
                     </div>
 
