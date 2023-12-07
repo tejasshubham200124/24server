@@ -1567,8 +1567,7 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
           dvr_history 
       WHERE 
           atmid = ?
-          ORDER BY 
-    last_communication DESC`;
+         `;
 
     if (formattedStartDate && formattedEndDate) {
         query += ` AND last_communication between  ? AND  ?`;
