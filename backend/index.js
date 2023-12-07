@@ -1504,7 +1504,6 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
     console.log('Received startDate:', startDate);
     console.log('Received endDate:', endDate);
 
-
     const formattedStartDate = startDate ? formatDate(startDate) + ' 00:00:00' : null;
     const formattedEndDate = endDate ? formatDate(endDate) + ' 23:59:59' : null;
 
@@ -1524,15 +1523,13 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
       FROM 
           dvr_history 
       WHERE 
-          atmid = ?
-          ORDER BY 
-    last_communication DESC`;
+          atmid = ?`;
 
     if (formattedStartDate && formattedEndDate) {
-        query += ` AND last_communication between  ? AND  ?`;
+        query += ` AND last_communication BETWEEN ? AND ?`;
     }
 
-    query += ` ORDER BY last_communication ASC`;
+    query += ` ORDER BY last_communication DESC LIMIT ? OFFSET ?`;
 
     const totalCountQuery = `
       SELECT COUNT(*) AS totalCount
@@ -1546,12 +1543,9 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
             res.status(500).json({ error: 'Error fetching total count of records' });
         } else {
             const totalCount = countResult[0].totalCount;
-
             const offset = (page - 1) * recordsPerPage;
 
-            query += ` LIMIT ${recordsPerPage} OFFSET ${offset};`;
-
-            db.query(query, [atmId, formattedStartDate, formattedEndDate], (err, result) => {
+            db.query(query, [atmId, formattedStartDate, formattedEndDate, recordsPerPage, offset], (err, result) => {
                 if (err) {
                     console.error('Error fetching history data for ATM ID:', err);
                     res.status(500).json({ error: 'Error fetching history data' });
@@ -1562,6 +1556,7 @@ app.get('/devicehistoryThree/:atmId', (req, res) => {
         }
     });
 });
+
 
 app.get('/AllSites', (req, res) => {
     const recordsPerPage = 50;
