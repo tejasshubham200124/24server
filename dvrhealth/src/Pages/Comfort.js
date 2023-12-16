@@ -89,51 +89,74 @@ const Comfort = () => {
         XLSX.writeFile(wb, 'Online_Sites.xlsx');
     };
 
+    // const getZoneStatus = (zone) => {
+    //     let statusText = "";
+    //     let statusColor = "";
+
+    //     if (zone.zone_no <= 36) {
+    //         switch (zone.status) {
+    //             case 0:
+    //                 statusText = "Close";
+    //                 statusColor = "red";
+    //                 break;
+    //             case 1:
+    //                 statusText = "Open";
+    //                 statusColor = "green";
+    //                 break;
+    //             default:
+    //                 statusText = "Unknown";
+    //                 break;
+    //         }
+    //     } else {
+    //         switch (zone.status) {
+    //             case 0:
+    //                 statusText = "Close";
+    //                 statusColor = "#6C3428";
+    //                 break;
+    //             case 1:
+    //                 statusText = "Triggered";
+    //                 statusColor = "#6C3428";
+    //                 break;
+    //             case 2:
+    //                 statusText = "Disconnected";
+    //                 statusColor = "#6C3428";
+    //                 break;
+    //             case 3:
+    //                 statusText = "Open";
+    //                 statusColor = "#6C3428";
+    //                 break;
+    //             default:
+    //                 statusText = "Unknown";
+    //                 statusColor = "#6C3428";
+    //                 break;
+    //         }
+    //     }
+
+    //     return <span style={{ color: statusColor }}>{statusText}</span>;
+    // };
+
+
     const getZoneStatus = (zone) => {
         let statusText = "";
         let statusColor = "";
-
-        if (zone.zone_no <= 36) {
-            switch (zone.status) {
-                case 0:
-                    statusText = "Close";
-                    statusColor = "red";
-                    break;
-                case 1:
-                    statusText = "Open";
-                    statusColor = "green";
-                    break;
-                default:
-                    statusText = "Unknown";
-                    break;
-            }
-        } else {
-            switch (zone.status) {
-                case 0:
-                    statusText = "Close";
-                    statusColor = "#6C3428";
-                    break;
-                case 1:
-                    statusText = "Triggered";
-                    statusColor = "#6C3428";
-                    break;
-                case 2:
-                    statusText = "Disconnected";
-                    statusColor = "#6C3428";
-                    break;
-                case 3:
-                    statusText = "Open";
-                    statusColor = "#6C3428";
-                    break;
-                default:
-                    statusText = "Unknown";
-                    statusColor = "#6C3428";
-                    break;
-            }
+    
+        switch (zone.armed) {
+            case 1:
+                statusText = "Open";
+                statusColor = "green";
+                break;
+            case 0:
+                statusText = "Bypassed";
+                statusColor = "red"; 
+                break;
+            default:
+                statusText = "Unknown";
+                break;
         }
-
+    
         return <span style={{ color: statusColor }}>{statusText}</span>;
     };
+    
 
 
     return (
