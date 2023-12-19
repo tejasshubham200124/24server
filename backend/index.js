@@ -2214,6 +2214,50 @@ app.post('/login', (req, res) => {
     });
 });
 
+
+
+
+
+
+
+const renderZoneDetailsBackend = (zoneConfig) => {
+    const formattedDetails = {};
+
+    zoneConfig.forEach(zone => {
+        if (zone.zone_no === 37) {
+            // Special case for zone_no 37
+            switch (zone.status) {
+                case 0:
+                    formattedDetails['Zone 37'] = 'Normal/blue';
+                    break;
+                case 1:
+                    formattedDetails['Zone 37'] = 'Triggered/red';
+                    break;
+                case 2:
+                    formattedDetails['Zone 37'] = 'Short/yellow';
+                    break;
+                case 3:
+                    formattedDetails['Zone 37'] = 'Open/green';
+                    break;
+                default:
+                    formattedDetails['Zone 37'] = 'Unknown/gray';
+                    break;
+            }
+        } else {
+            const statusText = zone.armed === 1 ? 'Active' : 'Bypassed';
+            const armStatusText = zone.arm_status === 1 ? 'Armed' : 'Disarmed';
+            const enabledText = zone.enabled === 0 ? 'Disabled' : 'Enabled';
+
+            formattedDetails[`${zone.zone_name}`] = `${statusText}/${armStatusText}/${enabledText}`;
+        }
+    });
+
+    return formattedDetails;
+};
+
+
+
+
 app.get('/ExportPanelHealthDetails', async (req, res) => {
     const apiUrl = 'http://103.141.218.26:8080/Hitachi/api/panel_health_data_report_ajax_api.php';
 
@@ -2230,13 +2274,36 @@ app.get('/ExportPanelHealthDetails', async (req, res) => {
                     try {
                         const parsedZoneConfig = JSON.parse(record.zone_config);
                         record.zone_config = parsedZoneConfig;
+
+                        // Modify the rendering of zone_config_text based on new conditions
+                        const formattedDetails = renderZoneDetailsBackend(parsedZoneConfig);
+                        record.zone_config_text = formattedDetails;
                     } catch (e) {
                         console.error('Error parsing zone_config:', e);
+                        record.zone_config = [];
+                        record.zone_config_text = ''; // Set empty string if parsing fails
                     }
+                } else {
+                    console.warn('Warning: zone_config is missing or empty for a record.');
+                    record.zone_config = [];
+                    record.zone_config_text = ''; // Set empty string if zone_config is missing
                 }
             });
 
-            res.status(200).json({ data: result });
+            // Log the modified result for debugging
+            console.log('Modified Result:', result);
+
+            // Format the data for Excel
+            const excelData = result.map(record => ({
+                id: record.id,
+                mac_id: record.mac_id,
+                atmid: record.atmid,
+                group_id: record.group_id,
+                panel_name: record.panel_name,
+                ...record.zone_config_text, // Use the formatted details directly
+            }));
+
+            res.status(200).json({ data: excelData });
         } else {
             console.error('Error: Response data is not in the expected format.');
             res.status(500).json({ error: 'Error fetching panel health data' });
@@ -2246,6 +2313,14 @@ app.get('/ExportPanelHealthDetails', async (req, res) => {
         res.status(500).json({ error: 'Error fetching panel health data' });
     }
 });
+
+
+
+
+
+
+
+
 
 
 app.get('/verify_id', (req, res) => {
