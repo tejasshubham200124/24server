@@ -11,6 +11,7 @@ import Cards from './Pages/Cards';
 import Tables from './Pages/Tables';
 import CameraOne from './Pages/CameraOne';
 import CameraTwo from './Pages/CameraTwo';
+import ComfortPanel from './Pages/ComfortPanel';
 import CameraThree from './Pages/CameraThree';
 import CameraFour from './Pages/CameraFour';
 import ExampleTwo from './Pages/ExampleTwo';
@@ -103,6 +104,7 @@ function App() {
         <Route path="DeviceHistory/:atmId" element={<DeviceHistory />} />
         <Route path="Tables" element={<Tables />} />
         <Route path="ExampleTwo" element={<ExampleTwo />} />
+        <Route path="ComfortPanel" element={<ComfortPanel />} />
         <Route path="SiteTable" element={<SiteTable />} />
         <Route path="Hdd" element={<Hdd />} />
         <Route path="TableRow" element={<TableRow />} />

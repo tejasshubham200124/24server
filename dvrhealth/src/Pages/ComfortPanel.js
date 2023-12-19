@@ -5,7 +5,7 @@ import axios from 'axios';
 import * as XLSX from 'xlsx';
 
 
-const Comfort = () => {
+const ComfortPanel = () => {
     const [post, setPost] = useState([]);
     const [number, setNumber] = useState(1);
     const [postPerPage] = useState(50);
@@ -30,8 +30,6 @@ const Comfort = () => {
         if (searchTerm) {
             apiUrl += `&atmid=${searchTerm}`;
         }
-
-
         axios
             .get(apiUrl)
             .then((response) => {
@@ -90,26 +88,71 @@ const Comfort = () => {
         XLSX.writeFile(wb, 'Online_Sites.xlsx');
     };
 
-    const getZoneStatus = (zone) => {
-        let statusText = "";
-        let statusColor = "";
-    
-        switch (zone.armed) {
-            case 1:
-                statusText = "Open";
-                statusColor = "green";
+    const renderZoneDetails = (zoneConfig) => {
+        const cells = [];
+      
+        const getZoneStatus = (zone) => {
+          let statusText = 'Unknown';
+          let statusColor = 'gray';
+      
+          if (zone.zone_no === 37) {
+            switch (zone.status) {
+              case 0:
+                statusText = 'Normal';
+                statusColor = 'blue';
                 break;
-            case 0:
-                statusText = "Bypassed";
-                statusColor = "red"; 
+              case 1:
+                statusText = 'Triggered';
+                statusColor = 'red';
                 break;
-            default:
-                statusText = "Unknown";
+              case 2:
+                statusText = 'Short';
+                statusColor = 'yellow';
                 break;
+              case 3:
+                statusText = 'Open';
+                statusColor = 'green';
+                break;
+              default:
+                statusText = 'Unknown';
+                statusColor = 'gray';
+                break;
+            }
+          } else {
+            statusText = zone.armed === 1 ? 'Active/' : 'Bypassed/';
+            statusText += zone.arm_status === 1 ? 'Armed/' : 'Disarmed/';
+            statusText += zone.enabled === 0 ? 'Zone Disabled' : 'Zone Enabled';
+            statusColor = getStatusColor(zone);
+          }
+      
+          return { statusText, statusColor };
+        };
+      
+        const getStatusColor = (zone) => {
+          if (zone.armed === 1) {
+            return 'green'; 
+          } else if (zone.armed === 0) {
+            return 'red';
+          }
+          return 'gray';
+        };
+      
+        for (let zoneIndex = 0; zoneIndex < zoneConfig.length; zoneIndex++) {
+          const zone = zoneConfig[zoneIndex];
+          const { statusText, statusColor } = getZoneStatus(zone);
+      
+          cells.push(
+            <td key={zoneIndex}>
+              <span style={{ color: statusColor, fontWeight: 'bold', fontSize: '13px' }}>
+                {statusText}
+              </span>
+            </td>
+          );
         }
-    
-        return <span style={{ color: statusColor }}>{statusText}</span>;
-    };
+      
+        return cells;
+      };
+
 
 
 
@@ -167,20 +210,18 @@ const Comfort = () => {
                                 {post.map((users, index) => (
                                     <tr key={index}>
                                         <td>{index + 1}</td>
-                                        <td style={{ color: 'darkblue', fontWeight: 'bold', fontSize: '13px' }}>
-                                            {users.atmid}
-                                        </td>
+                                        <td style={{ color: 'darkblue', fontWeight: 'bold', fontSize: '13px' }}>{users.atmid}</td>
                                         <td style={{ color: 'orange', fontWeight: 'bold', fontSize: '13px' }}>{users.panel_name}</td>
                                         {users.zone_config && Array.isArray(users.zone_config) ? (
-                                            users.zone_config.map((zone, zoneIndex) => (
-                                                <td key={zoneIndex}>{getZoneStatus(zone)}</td>
-                                            ))
+                                            renderZoneDetails(users.zone_config)
                                         ) : (
                                             <td>No Zone Data</td>
                                         )}
                                     </tr>
                                 ))}
                             </tbody>
+
+
                         </Table>
 
                         <ReactPaginate
@@ -200,4 +241,4 @@ const Comfort = () => {
     );
 };
 
-export default Comfort;
+export default ComfortPanel;
