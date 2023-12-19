@@ -92,7 +92,7 @@ const App = () => {
                         >
                             <option value="" disabled>Select</option>
                             <option value="/admin">Dvr Health</option>
-                            <option value="/admin/Comfort">Comfort Panel</option>
+                            <option value="/admin/ComfortPanel">Comfort Panel</option>
                             <option value="/admin/PanelHealth">Panel Health</option>
                             <option value="/admin/NetworkReport">Network Report</option>
                         </select>
