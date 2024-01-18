@@ -15,6 +15,35 @@ const ComfortPanel = () => {
     const [loading, setLoading] = useState(true);
     const [totalCount, setTotalCount] = useState(0);
 
+    const [updatedRecords, setUpdatedRecords] = useState(null)
+
+    // const fetchUpdatedData = async () => {
+    //     try {
+    //         const response = await fetch('http://103.141.218.26:8080/Hitachi/api/get_panel_health_pnb_cts_data.php', {
+    //             mode: 'no-cors'
+    //         });
+    //         const result = await response.text();
+    //         setUpdatedRecords(result);
+    //         console.log(result)
+    //     } catch (error) {
+    //         console.error('Error fetching data:', error);
+    //     }
+    // };
+
+    const fetchUpdatedData = async () => {
+        try {
+            const response = await fetch('http://103.141.218.26:8080/Hitachi/api/get_panel_health_pnb_cts_data.php');
+            const result = await response.json();
+            setUpdatedRecords(result);
+            console.log(result);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
+    
+
+
+
     const firstPost = (number - 1) * postPerPage;
     const lastPost = Math.min(firstPost + postPerPage, totalCount);
 
@@ -33,10 +62,10 @@ const ComfortPanel = () => {
         axios
             .get(apiUrl)
             .then((response) => {
-                console.log('API Response for Page', page, ':', response.data);
+                // console.log('API Response for Page', page, ':', response.data);
                 const responseData = response.data.data || [];
                 setPost(responseData);
-                console.log(responseData)
+                // console.log(responseData)
                 setTotalCount(response.data.totalCount || 0);
             })
             .catch((error) => {
@@ -90,68 +119,68 @@ const ComfortPanel = () => {
 
     const renderZoneDetails = (zoneConfig) => {
         const cells = [];
-      
+
         const getZoneStatus = (zone) => {
-          let statusText = 'Unknown';
-          let statusColor = 'gray';
-      
-          if (zone.zone_no === 37) {
-            switch (zone.status) {
-              case 0:
-                statusText = 'Normal';
-                statusColor = 'blue';
-                break;
-              case 1:
-                statusText = 'Triggered';
-                statusColor = 'red';
-                break;
-              case 2:
-                statusText = 'Short';
-                statusColor = 'yellow';
-                break;
-              case 3:
-                statusText = 'Open';
-                statusColor = 'green';
-                break;
-              default:
-                statusText = 'Unknown';
-                statusColor = 'gray';
-                break;
+            let statusText = 'Unknown';
+            let statusColor = 'gray';
+
+            if (zone.zone_no === 37) {
+                switch (zone.status) {
+                    case 0:
+                        statusText = 'Normal';
+                        statusColor = 'blue';
+                        break;
+                    case 1:
+                        statusText = 'Triggered';
+                        statusColor = 'red';
+                        break;
+                    case 2:
+                        statusText = 'Short';
+                        statusColor = 'yellow';
+                        break;
+                    case 3:
+                        statusText = 'Open';
+                        statusColor = 'green';
+                        break;
+                    default:
+                        statusText = 'Unknown';
+                        statusColor = 'gray';
+                        break;
+                }
+            } else {
+                statusText = zone.armed === 1 ? 'Active/' : 'Bypassed/';
+                statusText += zone.arm_status === 1 ? 'Armed/' : 'Disarmed/';
+                statusText += zone.enabled === 0 ? 'Zone Disabled' : 'Zone Enabled';
+                statusColor = getStatusColor(zone);
             }
-          } else {
-            statusText = zone.armed === 1 ? 'Active/' : 'Bypassed/';
-            statusText += zone.arm_status === 1 ? 'Armed/' : 'Disarmed/';
-            statusText += zone.enabled === 0 ? 'Zone Disabled' : 'Zone Enabled';
-            statusColor = getStatusColor(zone);
-          }
-      
-          return { statusText, statusColor };
+
+            return { statusText, statusColor };
         };
-      
+
         const getStatusColor = (zone) => {
-          if (zone.armed === 1) {
-            return 'green'; 
-          } else if (zone.armed === 0) {
-            return 'red';
-          }
-          return 'gray';
+            if (zone.armed === 1) {
+                return 'green';
+            } else if (zone.armed === 0) {
+                return 'red';
+            }
+            return 'gray';
         };
-      
+
         for (let zoneIndex = 0; zoneIndex < zoneConfig.length; zoneIndex++) {
-          const zone = zoneConfig[zoneIndex];
-          const { statusText, statusColor } = getZoneStatus(zone);
-      
-          cells.push(
-            <td key={zoneIndex}>
-              <span style={{ color: statusColor, fontWeight: 'bold', fontSize: '13px' }}>
-                {statusText}
-              </span>
-            </td>
-          );
+            const zone = zoneConfig[zoneIndex];
+            const { statusText, statusColor } = getZoneStatus(zone);
+
+            cells.push(
+                <td key={zoneIndex}>
+                    <span style={{ color: statusColor, fontWeight: 'bold', fontSize: '13px' }}>
+                        {statusText}
+                    </span>
+                </td>
+            );
         }
-      
+
         return cells;
-      };
+    };
 
 
 
@@ -171,6 +200,10 @@ const ComfortPanel = () => {
                             <button onClick={exportToExcel} className="btn btn-primary mt-3">
                                 Export to Excel
                             </button>
+
+                            <button className='btn btn-success ml-3 pt-2' onClick={fetchUpdatedData}>Fetch Data</button>
+
+
                         </div>
                         <div className="col-6 d-flex justify-content-end">
                             <div className='col-4 text-end login-form2'>
@@ -190,6 +223,9 @@ const ComfortPanel = () => {
                             </div>
                         </div>
                     </div>
+                    {updatedRecords !== null && (
+                        <p>{updatedRecords} hrllo</p>
+                    )}
                     <div style={{ overflowY: 'auto', scrollbarWidth: 'thin' }}>
                         <Table className='custom-tablepanel mt-4'>
                             <thead>

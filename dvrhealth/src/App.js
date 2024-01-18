@@ -43,6 +43,7 @@ import NetworkReport from './Pages/NetworkReport';
 import NetworkTotalSites from './Pages/NetworkTotalSites';
 import NetworkWorking from './Pages/NetworkWorking';
 import NetworkNotWorking from './Pages/NetworkNotWorking';
+import LatestPanelHealthData from './Pages/LatestPanelHealthData';
 
 
 function App() {
@@ -127,6 +128,7 @@ function App() {
         <Route path="NetworkTotalSites" element={<NetworkTotalSites />} />
         <Route path="NetworkWorking" element={<NetworkWorking />} />
         <Route path="NetworkNotWorking" element={<NetworkNotWorking />} />
+        <Route path="LatestPanelHealthData" element={<LatestPanelHealthData />} />
       </Route>
     </Routes>
   );

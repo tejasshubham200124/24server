@@ -50,6 +50,8 @@ app.use(cors({
 //     origin: 'http://localhost:3000'
 // }));
 
+app.use(cors());
+
 
 
 app.get('/TotalSites', (req, res) => {
@@ -1482,14 +1484,14 @@ app.get('/PanelHealthDetailsapid', (req, res) => {
                 let result = responseData.res_data;
 
                 if (atmid) {
-                    // Filter results by atmid if atmid is provided
+                   
                     result = result.filter(record => record.atmid.includes(atmid));
                 }
 
                 if (filterStatus) {
-                    // Filter results based on the status query parameter
+                   
                     result = result.filter(record => {
-                        // Assuming "status" is a field in your data, adjust this as per your data structure
+                       
                         return record.status === filterStatus;
                     });
                 }
@@ -2290,10 +2292,6 @@ app.get('/ExportPanelHealthDetails', async (req, res) => {
                 }
             });
 
-            // Log the modified result for debugging
-            console.log('Modified Result:', result);
-
-            // Format the data for Excel
             const excelData = result.map(record => ({
                 id: record.id,
                 mac_id: record.mac_id,
