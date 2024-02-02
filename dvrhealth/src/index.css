@@ -838,3 +838,34 @@ a{
   gap:20px;
   padding-top: 2rem;
 }
+
+/* DvrHealthTable.css */
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination-page {
+  display: inline-block;
+  margin: 0 5px;
+  padding: 10px 15px;
+  border: 2px solid #3498db;
+  color: #3498db;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination-page:hover {
+  background-color: #3498db;
+  color: #fff;
+}
+
+.active {
+  background-color: #3498db;
+  color: #fff;
+  border: 2px solid #3498db;
+}
+

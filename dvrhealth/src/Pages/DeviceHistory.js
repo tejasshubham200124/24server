@@ -30,7 +30,7 @@ const DeviceHistory = () => {
 
     const [post, setPost] = useState([]);
     const [number, setNumber] = useState(1);
-    const [postPerPage] = useState(100);
+    const [postPerPage] = useState(50);
     const [loading, setLoading] = useState(true);
     const [totalCount, setTotalCount] = useState(0);
     const [data, setData] = useState([])

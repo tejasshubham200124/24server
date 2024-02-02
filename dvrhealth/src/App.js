@@ -44,6 +44,7 @@ import NetworkTotalSites from './Pages/NetworkTotalSites';
 import NetworkWorking from './Pages/NetworkWorking';
 import NetworkNotWorking from './Pages/NetworkNotWorking';
 import LatestPanelHealthData from './Pages/LatestPanelHealthData';
+import SiteTableTwo from './Pages/SiteTableTwo';
 
 
 function App() {
@@ -129,6 +130,7 @@ function App() {
         <Route path="NetworkWorking" element={<NetworkWorking />} />
         <Route path="NetworkNotWorking" element={<NetworkNotWorking />} />
         <Route path="LatestPanelHealthData" element={<LatestPanelHealthData />} />
+        <Route path="SiteTableTwo" element={<SiteTableTwo />} />
       </Route>
     </Routes>
   );

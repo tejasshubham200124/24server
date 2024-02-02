@@ -17,29 +17,29 @@ const ComfortPanel = () => {
 
     const [updatedRecords, setUpdatedRecords] = useState(null)
 
-    // const fetchUpdatedData = async () => {
-    //     try {
-    //         const response = await fetch('http://103.141.218.26:8080/Hitachi/api/get_panel_health_pnb_cts_data.php', {
-    //             mode: 'no-cors'
-    //         });
-    //         const result = await response.text();
-    //         setUpdatedRecords(result);
-    //         console.log(result)
-    //     } catch (error) {
-    //         console.error('Error fetching data:', error);
-    //     }
-    // };
-
     const fetchUpdatedData = async () => {
         try {
-            const response = await fetch('http://103.141.218.26:8080/Hitachi/api/get_panel_health_pnb_cts_data.php');
-            const result = await response.json();
+            const response = await fetch('http://103.141.218.26:8080/Hitachi/api/get_panel_health_pnb_cts_data.php', {
+                mode: 'no-cors'
+            });
+            const result = await response.text();
             setUpdatedRecords(result);
-            console.log(result);
+            console.log(result)
         } catch (error) {
             console.error('Error fetching data:', error);
         }
     };
+
+    // const fetchUpdatedData = async () => {
+    //     try {
+    //         const response = await fetch('http://103.141.218.26:8080/Hitachi/api/get_panel_health_pnb_cts_data.php');
+    //         const result = await response.json();
+    //         setUpdatedRecords(result);
+    //         console.log(result);
+    //     } catch (error) {
+    //         console.error('Error fetching data:', error);
+    //     }
+    // };
     
 
 
@@ -202,8 +202,6 @@ const ComfortPanel = () => {
                             </button>
 
                             <button className='btn btn-success ml-3 pt-2' onClick={fetchUpdatedData}>Fetch Data</button>
-
-
                         </div>
                         <div className="col-6 d-flex justify-content-end">
                             <div className='col-4 text-end login-form2'>
