@@ -15,7 +15,33 @@ const ComfortPanel = () => {
     const [loading, setLoading] = useState(true);
     const [totalCount, setTotalCount] = useState(0);
 
-    const [updatedRecords, setUpdatedRecords] = useState(null)
+    const [updatedRecords, setUpdatedRecords] = useState("")
+
+
+
+    const [numberData, setNumberData] = useState(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await fetch('http://103.141.218.26:8080/Hitachi/api/get_panel_health_pnb_cts_data.php', {
+                    mode: 'no-cors' // Add no-cors mode here
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const textData = await response.text();
+                // Assume textData is just a number in string format
+                const number = parseFloat(textData); // Convert text to number
+                setNumberData(number);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
 
     const fetchUpdatedData = async () => {
         try {
@@ -23,6 +49,8 @@ const ComfortPanel = () => {
                 mode: 'no-cors'
             });
             const result = await response.text();
+
+            console.log(response)
             setUpdatedRecords(result);
             console.log(result)
         } catch (error) {
@@ -40,7 +68,7 @@ const ComfortPanel = () => {
     //         console.error('Error fetching data:', error);
     //     }
     // };
-    
+
 
 
 
@@ -187,6 +215,9 @@ const ComfortPanel = () => {
 
     return (
         <div>
+            {
+                console.log(numberData)
+            }
             {loading && (
                 <div className="loader-container">
                     <div className="loader"></div>
@@ -221,9 +252,11 @@ const ComfortPanel = () => {
                             </div>
                         </div>
                     </div>
-                    {updatedRecords !== null && (
+
+                    {updatedRecords ? updatedRecords : 'No Records'}
+                    {/* {updatedRecords !== null && (
                         <p>{updatedRecords} hrllo</p>
-                    )}
+                    )} */}
                     <div style={{ overflowY: 'auto', scrollbarWidth: 'thin' }}>
                         <Table className='custom-tablepanel mt-4'>
                             <thead>
