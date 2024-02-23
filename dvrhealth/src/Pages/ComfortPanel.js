@@ -231,7 +231,7 @@ const ComfortPanel = () => {
                             <button onClick={exportToExcel} className="btn btn-primary mt-3">
                                 Export to Excel
                             </button>
-
+  
                             <button className='btn btn-success ml-3 pt-2' onClick={fetchUpdatedData}>Fetch Data</button>
                         </div>
                         <div className="col-6 d-flex justify-content-end">
@@ -247,7 +247,6 @@ const ComfortPanel = () => {
                                     }}
                                     placeholder='search atmid'
                                     className='form-control'
-
                                 />
                             </div>
                         </div>

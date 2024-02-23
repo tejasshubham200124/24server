@@ -174,9 +174,9 @@ const DvrData = () => {
                 <td style={{ fontWeight: 700, color: (users.router_port_status === 'Y') ? 'green' : (users.router_port_status === 'O') ? 'orange' : 'red' }}>
                   {users.router_port_status === 'Y' ? <BsRouter size={20} color="green" /> : (users.router_port_status === 'O') ? <BsRouter size={20} color="orange" /> : <BsRouter size={20} color="red" />}
                 </td>
-                {/* <td style={{ fontWeight: 700, color: (users.sdk_port_status === 'Y') ? 'green' : (users.sdk_port_status === 'O') ? 'orange' : 'red' }}>
+                <td style={{ fontWeight: 700, color: (users.sdk_port_status === 'Y') ? 'green' : (users.sdk_port_status === 'O') ? 'orange' : 'red' }}>
                   {users.sdk_port_status === 'Y' ? <TbSdk size={20} color="green" /> : (users.sdk_port_status === 'O') ? <TbSdk size={20} color="orange" /> : <TbSdk size={20} color="red" />}
-                </td> */}
+                </td>
                 <td style={{ fontWeight: 700, color: (users.ai_port_status === 'Y') ? 'green' : (users.ai_port_status === 'O') ? 'orange' : 'red', fontWeight: 600, fontSize: '13px' }}>
                   {users.ai_port_status === 'Y' ? <FaRaspberryPi size={20} color="green" /> : (users.ai_port_status === 'O') ? <FaRaspberryPi size={20} color="orange" /> : <FaRaspberryPi size={20} color="red" />}
                 </td>
